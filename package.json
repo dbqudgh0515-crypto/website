@@ -1,5 +1,5 @@
 {
-  "name": "webpage",
+  "name": "website",
   "private": true,
   "type": "module",
   "description": "생활리듬 자가진단 정적 사이트. 빌드 도구 없음.",
