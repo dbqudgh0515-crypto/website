@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 입력값을 어디로도 보내지 않도록 브라우저에 네트워크 요청 자체를 막게 한다 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<title>생활리듬 자가진단</title>
+<meta name="description" content="취침·기상 기록을 넣으면 브라우저 안에서만 계산해 생활리듬을 정리해 주는 페이지">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main>
+  <h1>생활리듬 자가진단</h1>
+  <p class="sub">취침·기상 기록을 넣으면 수면 패턴을 정리해 보여줘요.</p>
+  <div class="banner">입력한 기록은 <b>이 기기의 브라우저 안에서만</b> 계산해요. 어디로도 보내지 않고, 페이지를 닫으면 남지 않아요.</div>
+
+  <section class="card">
+    <h2>기록 넣기</h2>
+    <p class="note">날짜는 <b>일어난 날</b> 기준이에요. 예: 월요일 아침에 일어났다면 그 줄은 월요일, 잠든 시각은 일요일 밤이에요. 7일 이상 넣으면 대부분의 항목이 보여요.</p>
+    <p class="note">시각은 <b>24시간제</b>로 적어요. 예: 밤 11시 40분은 23:40, 새벽 1시는 01:00. "2340"처럼 숫자만 적어도 돼요.</p>
+    <div class="inrow inhead"><span>일어난 날</span><span>잠든 시각</span><span>일어난 시각</span><span></span></div>
+    <div id="rows"></div>
+    <div class="btns"><button type="button" id="add">+ 하루 추가</button><button type="button" id="demo">예시 기록 넣기</button><button type="button" id="clear">모두 지우기</button></div>
+    <details>
+      <summary>한 번에 붙여넣기</summary>
+      <p class="note">한 줄에 하루씩 "날짜, 잠든 시각, 일어난 시각". 예: 2026-10-12, 23:40, 06:50</p>
+      <textarea id="paste" rows="5" placeholder="2026-10-12, 23:40, 06:50"></textarea>
+      <div class="btns"><button type="button" id="usePaste">붙여넣은 기록 쓰기</button></div>
+    </details>
+    <details>
+      <summary>(선택) 내 생각도 넣어서 비교하기</summary>
+      <div class="field"><label for="selfReg">나는 생활이 규칙적인 편이다 (1 전혀 아니다 ~ 5 매우 그렇다)</label>
+        <select id="selfReg"><option value="">선택 안 함</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <div class="field"><label for="expDelay">주말에 평일보다 몇 시간쯤 늦게 일어난다고 생각하나요?</label>
+        <input id="expDelay" type="number" min="0" max="12" step="0.5" inputmode="decimal" placeholder="예: 1.5"></div>
+    </details>
+    <p id="msg" class="err" role="alert"></p>
+    <button type="button" class="primary" id="go">결과 보기</button>
+  </section>
+
+  <div id="out" aria-live="polite"></div>
+  <footer>이 결과는 기록한 기간의 패턴을 정리한 것이고, 건강 상태를 판단하지 않아요.<br>학급 참고값은 분위수만 담고 있고 개인 기록은 들어 있지 않아요.</footer>
+</main>
+<script type="module" src="assets/selfcheck.js"></script>
+</body>
+</html>

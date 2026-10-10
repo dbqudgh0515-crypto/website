@@ -1,0 +1,7 @@
+# 개인 결과(암호문 포함)와 실제 데이터는 이 공개 저장소에 넣지 않는다
+d/*.bin
+data/
+private*/
+*.csv
+node_modules/
+__pycache__/

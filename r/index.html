@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 같은 사이트의 암호문 파일(d/*.bin)만 받아 올 수 있다. 열쇠는 주소의 # 뒤에만 있어 서버로 가지 않는다. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>내 생활리듬 결과</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<main>
+  <h1>내 생활리듬 결과</h1>
+  <p class="sub" id="meta">결과를 여는 중이에요…</p>
+  <div class="banner">이 페이지는 <b>본인만</b> 봐 주세요. 친구마다 결과를 받는 날이 달라요. <b>11월 1일 조사가 끝날 때까지</b> 화면을 보여주거나 내용을 이야기하지 말아 주세요. 조사가 끝난 뒤에는 괜찮아요.</div>
+  <div id="out" aria-live="polite"></div>
+  <footer>이 결과는 기록한 기간의 패턴을 정리한 것이고, 건강 상태를 판단하지 않아요.<br>수치 계산은 프로그램이 했고, 설명 문장은 그 수치를 바탕으로 만들었어요.</footer>
+</main>
+<script type="module" src="../assets/personal.js"></script>
+</body>
+</html>
