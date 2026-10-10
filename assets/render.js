@@ -120,9 +120,13 @@ function trendChart(m) {
   const dots = pts.map((p, i) => (fin(p.bed18) ? `<circle class="dot" cx="${x(i)}" cy="${y(p.bed18)}" r="4"/>` : "")).join("");
   let path = "", pen = false;
   pts.forEach((p, i) => { if (fin(p.avg7)) { path += `${pen ? "L" : "M"}${x(i).toFixed(1)},${y(p.avg7).toFixed(1)}`; pen = true; } else pen = false; });
+  // 기록이 없는 기간(예: 9월 기준선과 본조사 사이)이 7일 이상이면 그래프가 끊긴 이유를 알려 준다
+  let gap = 0, run = 0;
+  for (const p of pts) { run = fin(p.bed18) ? 0 : run + 1; gap = Math.max(gap, run); }
+  const gapNote = gap >= RULES.trendWindow ? ` 기록이 없는 ${gap}일 동안은 선이 끊겨요.` : "";
   return card("취침 시각 추세", `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="날짜별 취침 시각과 7일 평균">${g}${dots}<path class="trend" d="${path}"/></svg>
     <div class="legend"><span><i class="ld"></i>날마다의 취침</span><span><i class="ll"></i>7일 평균(추세)</span></div>
-    <p class="note">점이 위아래로 튀는 건 날마다의 흔들림이고, 선이 천천히 움직이는 건 추세예요. 선은 그날까지 7일 중 ${RULES.trendMinValues}일 이상 기록이 있을 때만 그려요.</p>`);
+    <p class="note">점이 위아래로 튀는 건 날마다의 흔들림이고, 선이 천천히 움직이는 건 추세예요. 선은 그날까지 7일 중 ${RULES.trendMinValues}일 이상 기록이 있을 때만 그려요.${gapNote}</p>`);
 }
 
 function feedback(text, m, storageKey) {
