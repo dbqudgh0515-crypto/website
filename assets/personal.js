@@ -35,7 +35,7 @@ async function main() {
   } catch (e) { return fail("인터넷 연결을 확인해 주세요."); }
   let p;
   try { p = await openSealed(bytes, link.k); } catch (e) { return fail("링크가 잘렸거나 바뀐 것 같아요."); }
-  // 예: "9월 기록 포함 · 9월 기준선 9/14~9/27, 본조사 10/12~10/19 (10/19 아침 기록까지 반영)"
+  // 예: "9월 기록 포함 · 9월 기준선 9/14~9/27, 본조사 10/19~10/26 (10/26 아침 기록까지 반영)"
   meta.textContent = p.periodNote || (p.generatedAt ? `${p.generatedAt} 아침 기록까지 반영` : "");
   renderResults(out, { records: p.records, survey: p.survey, classRef: p.classRef,
     feedbackText: p.feedback && p.feedback.text, storageKey: `goal-${link.i}` });
