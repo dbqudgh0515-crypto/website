@@ -244,12 +244,14 @@ export function templateText(m, cls) {
   return out.join(" ");
 }
 
-// 개선 목표 후보: 학생이 하나만 고른다. 고른 값은 이 기기 안에만 저장된다.
-export function goalOptions(m) {
-  const g = [];
-  if (Number.isFinite(m.bedResidSd)) g.push({ id: "bed-window", text: "평일 취침을 정한 시각 앞뒤 30분 안에 맞추기" });
-  if (Number.isFinite(m.socialJetlag) && m.socialJetlag >= 30) g.push({ id: "weekend-wake", text: "주말에도 평일보다 1시간 안에 일어나기" });
-  if (Number.isFinite(m.sleepMean)) g.push({ id: "wind-down", text: "잠들기 30분 전에 휴대폰 내려놓기" });
-  g.push({ id: "record", text: "매일 아침 기록 빠뜨리지 않기" });
-  return g;
+// 개선 목표 후보 3개(사전등록 5장). 학생이 하나만 고른다. 고른 값은 이 기기 안에만 저장된다.
+// "매일 아침 기록 빠뜨리지 않기"는 측정(기록 행동) 자체를 바꾸는 목표라 후보에서 뺐다.
+// 목표 제출 폼과 같은 3개를 늘 같은 순서로 보여준다.
+export const GOALS = [
+  { id: "bed-window", text: "평일 취침을 정한 시각 앞뒤 30분 안에 맞추기" },
+  { id: "weekend-wake", text: "주말에도 평일보다 1시간 안에 일어나기" },
+  { id: "wind-down", text: "잠들기 30분 전에 휴대폰 내려놓기" },
+];
+export function goalOptions() {
+  return GOALS;
 }

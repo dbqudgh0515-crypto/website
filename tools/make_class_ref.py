@@ -6,7 +6,7 @@
 - 학생별로 calc.js와 같은 지표를 계산한 뒤, 학급 분포를 분위수(10/25/50/75/90%)와 평균으로만 저장한다.
 - "비슷한 패턴" 칸(수면 중간 시각 3등분 x 사회적 시차 1시간 미만/이상)은 인원만 저장하고,
   5명 미만인 칸은 null로 비운다(누가 어느 칸인지 짐작하기 어렵게).
-- 유효 기록이 MIN_VALID일 미만인 학생은 기준값에서 뺀다.
+- 유효 기록이 min_valid일 미만인 학생은 기준값 계산에서만 빼고, 뺀 인원을 excluded에 남긴다.
 """
 import argparse
 import csv
@@ -18,7 +18,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import metrics_ref as M  # noqa: E402
 
-MIN_VALID = 7
+MIN_VALID = 5                      # 흔들림(표준편차) 계산 최소 기록 수와 같게
 KEYS = ["sleepMean", "bedResidSd", "wakeResidSd", "midMean18", "socialJetlag", "wakeGap"]
 
 
@@ -45,11 +45,12 @@ def read_records(path):
     return by_student
 
 
-def build(by_student, label):
+def build(by_student, label, min_valid=MIN_VALID):
     metrics = [M.compute_metrics(recs) for recs in by_student.values()]
-    metrics = [m for m in metrics if m["nValid"] >= MIN_VALID]
+    n_all = len(metrics)
+    metrics = [m for m in metrics if m["nValid"] >= min_valid]
     n = len(metrics)
-    ref = dict(label=label, n=n, minValid=MIN_VALID, quantiles={}, means={})
+    ref = dict(label=label, n=n, excluded=n_all - n, minValid=min_valid, quantiles={}, means={})
     for k in KEYS:
         v = [m[k] for m in metrics if M._finite(m[k])]
         ref["quantiles"][k] = {f"p{p}": quantile(v, p / 100) for p in M.QS} if len(v) >= 5 else None
