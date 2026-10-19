@@ -38,6 +38,8 @@ async function main() {
   // 예: "본조사 10/19~10/26 기록 (10/26 아침 기록까지 반영)"
   meta.textContent = p.periodNote || (p.generatedAt ? `${p.generatedAt} 아침 기록까지 반영` : "");
   renderResults(out, { records: p.records, survey: p.survey, classRef: p.classRef,
-    feedbackText: p.feedback && p.feedback.text, storageKey: `goal-${link.i}` });
+    feedbackText: p.feedback && p.feedback.text, storageKey: `goal-${link.i}`,
+    // 목표 제출 폼: 확인 코드 = 파일 ID 앞 8자 (연구자 링크 목록의 check_code와 같다)
+    goalForm: p.goalForm, checkCode: link.i.slice(0, 8) });
 }
 main();

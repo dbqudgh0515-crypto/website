@@ -5,6 +5,7 @@ import {
   bed18ToHhmm, minToHhmm, TRAVEL, RULES,
 } from "./calc.js";
 import { animateResults } from "./motion.js";
+import { PLAN_EXAMPLES, TIPS, prefillUrl } from "./goals.js";
 
 const WD = ["월", "화", "수", "목", "금", "토", "일"];
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -29,21 +30,21 @@ function classNote(ref) {
 
 function glance(m, cls, ref) {
   const mean = (k) => (ref && ref.means && fin(ref.means[k]) ? ref.means[k] : NaN);
+  // theirs: 학급 참고 평균을 화면에 쓸 글자. 학급 참고값에 평균이 없으면 null이라 줄을 빼고 보여준다
+  const classMean = (theirs) => (theirs ? `<div class="row note"><span>학급 참고 평균</span><span>${theirs}</span></div>` : "");
   const row = (label, mine, theirs, bar) => `<div class="metric">
       <div class="row"><span class="label">${label}</span><span class="value">${mine}</span></div>
-      ${fin(theirs) ? `<div class="row note"><span>학급 참고 평균</span><span>${theirs}</span></div>` : ""}${bar}</div>`;
+      ${classMean(theirs)}${bar}</div>`;
   let body = "";
   if (fin(m.sleepMean)) {
-    // 학급 참고 평균 줄은 row()와 같은 조건으로 둔다. theirs가 글자라 fin(theirs)가 늘 거짓이어서 지금은 어느 줄에도 보이지 않는다.
-    // 디자인 작업에서는 화면 내용을 바꾸지 않기로 해서 그대로 두었다(고칠지는 연구자가 정함).
-    const h = hours1(m.sleepMean), theirs = fin(mean("sleepMean")) ? `${hours1(mean("sleepMean"))}시간` : NaN;
+    const h = hours1(m.sleepMean), theirs = fin(mean("sleepMean")) ? `${hours1(mean("sleepMean"))}시간` : null;
     body += `<div class="metric hero"><div class="label">평균 수면</div>
       <div class="hero-num"><span class="num countup" data-to="${h}" data-dec="1">${h}</span><span class="unit">시간</span></div>
-      ${fin(theirs) ? `<div class="row note"><span>학급 참고 평균</span><span>${theirs}</span></div>` : ""}${cls ? posBar(cls.sleepPct, "짧은 쪽", "긴 쪽") : ""}</div>`;
+      ${classMean(theirs)}${cls ? posBar(cls.sleepPct, "짧은 쪽", "긴 쪽") : ""}</div>`;
   }
-  if (fin(m.bedResidSd)) body += row("취침 시각 흔들림", `±${Math.round(m.bedResidSd)}분`, fin(mean("bedResidSd")) ? `±${Math.round(mean("bedResidSd"))}분` : NaN,
+  if (fin(m.bedResidSd)) body += row("취침 시각 흔들림", `±${Math.round(m.bedResidSd)}분`, fin(mean("bedResidSd")) ? `±${Math.round(mean("bedResidSd"))}분` : null,
     cls ? posBar(cls.bedSdPct, "덜 흔들림", "더 흔들림") : "");
-  if (fin(m.wakeResidSd)) body += row("기상 시각 흔들림", `±${Math.round(m.wakeResidSd)}분`, fin(mean("wakeResidSd")) ? `±${Math.round(mean("wakeResidSd"))}분` : NaN,
+  if (fin(m.wakeResidSd)) body += row("기상 시각 흔들림", `±${Math.round(m.wakeResidSd)}분`, fin(mean("wakeResidSd")) ? `±${Math.round(mean("wakeResidSd"))}분` : null,
     cls ? posBar(cls.wakeSdPct, "덜 흔들림", "더 흔들림") : "");
   if (!body) return card("한눈에", `<p class="note">기록이 더 필요해요. 흔들림은 ${RULES.minDaysSd}일 이상 기록이 있어야 보여요.</p>`);
   return card("한눈에", `<p>${m.nValid}일 기록 · 보통 ${bed18ToHhmm(m.bedMean18)}쯤 자고 ${minToHhmm(m.wakeMean)}쯤 일어났어요.</p>${body}
@@ -144,17 +145,31 @@ function trendChart(m) {
     <p class="note">점이 위아래로 튀는 건 날마다의 흔들림이고, 선이 천천히 움직이는 건 추세예요. 선은 그날까지 7일 중 ${RULES.trendMinValues}일 이상 기록이 있을 때만 그려요.${gapNote}</p>`);
 }
 
-function feedback(text, m, storageKey) {
+// 목표 하나를 고르면 그 목표의 실천 계획 예시와 팁(출처 링크)이 보인다. 팁이 아직 없으면 예시만 보인다.
+function goalHelp(g) {
+  const tips = TIPS[g.id] || [];
+  const list = tips.length ? `<p class="help-title">도움이 되는 방법</p><ul class="tips">${tips.map((t) =>
+    `<li>${esc(t.text)} <a href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">출처: ${esc(t.source)}</a></li>`).join("")}</ul>` : "";
+  return `<div class="goal-help" data-goal="${g.id}" hidden>
+    <p class="help-title">실천 계획 예시</p><p class="plan-line">${esc(PLAN_EXAMPLES[g.id] || "")}</p>${list}</div>`;
+}
+
+// withForm이면(개인 결과 페이지) 고른 목표와 확인 코드를 채운 구글폼을 새 탭으로 여는 버튼을 둔다.
+// 없으면(공개 자가진단) 버튼 없이, 고른 목표는 이 기기에만 저장된다고 알린다.
+function feedback(text, m, storageKey, withForm) {
   const goals = goalOptions(m);
   let saved = null;
   try { saved = storageKey ? localStorage.getItem(storageKey) : null; } catch (e) { saved = null; }
   const radios = goals.map((g) => `<label><input type="radio" name="goal" value="${g.id}" ${saved === g.id ? "checked" : ""}><span>${esc(g.text)}</span></label>`).join("");
+  const submit = withForm
+    ? `<a class="button primary goal-submit" target="_blank" rel="noopener noreferrer" aria-disabled="true">목표와 계획 제출하기</a>
+    <p class="note">목표를 고른 뒤 버튼을 누르면 구글폼이 새 탭에서 열려요. 확인 코드와 고른 목표가 미리 채워져 있으니, 실천 계획 한 줄을 직접 쓰고 제출해 주세요. 이름 대신 확인 코드만 들어가고, 제출해야 연구자에게 전해져요.</p>`
+    : `<p class="note">고른 목표는 이 기기 브라우저에만 저장돼요. 다른 곳으로 보내지 않아요.</p>`;
   return card("설명과 이번 주 목표", `<p>${esc(text)}</p>
-    <p><b>이번 주에 해볼 것 하나만 골라 보세요.</b></p><div class="goals">${radios}</div>
-    <p class="note">고른 목표는 이 기기 브라우저에만 저장돼요. 다른 곳으로 보내지 않아요.</p>`);
+    <p><b>이번 주에 해볼 것 하나만 골라 보세요.</b></p><div class="goals">${radios}</div>${goals.map(goalHelp).join("")}${submit}`);
 }
 
-export function renderResults(el, { records, survey, classRef, feedbackText, storageKey }) {
+export function renderResults(el, { records, survey, classRef, feedbackText, storageKey, goalForm, checkCode }) {
   const m = computeMetrics(records);
   if (m.nValid < 3) {
     el.innerHTML = card("결과", `<p>쓸 수 있는 기록이 ${m.nValid}일이에요. 3일 이상이면 보여드릴게요.</p>
@@ -163,12 +178,24 @@ export function renderResults(el, { records, survey, classRef, feedbackText, sto
   }
   const cls = compareToClass(m, classRef);
   const text = feedbackText || templateText(m, cls);
+  const goals = goalOptions(m);
+  const formOk = prefillUrl(goalForm, checkCode, goals[0].text) !== null;
   el.innerHTML = [glance(m, cls, classRef), midSleep(m, cls, classRef), jetlag(m, cls), weekdays(m), similar(cls),
-    selfVsMeasured(m, cls, survey), trendChart(m), feedback(text, m, storageKey)].join("");
+    selfVsMeasured(m, cls, survey), trendChart(m), feedback(text, m, storageKey, formOk)].join("");
   // 보안 정책(CSP)이 HTML 속 style 속성을 막으므로 위치는 그린 뒤 JS로 넣는다
   el.querySelectorAll("[data-x]").forEach((d) => { d.style.left = `${d.dataset.x}%`; });
   animateResults(el);
+  const submitEl = el.querySelector(".goal-submit");
+  const choose = (id) => {
+    el.querySelectorAll(".goal-help").forEach((h) => { h.hidden = h.dataset.goal !== id; });
+    const g = goals.find((x) => x.id === id);
+    const url = submitEl && g ? prefillUrl(goalForm, checkCode, g.text) : null;
+    if (url) { submitEl.href = url; submitEl.removeAttribute("aria-disabled"); }
+  };
+  const checked = el.querySelector('input[name="goal"]:checked');
+  if (checked) choose(checked.value);
   el.querySelectorAll('input[name="goal"]').forEach((r) => r.addEventListener("change", () => {
+    choose(r.value);
     try { if (storageKey) localStorage.setItem(storageKey, r.value); } catch (e) { /* 저장 못 해도 화면은 그대로 */ }
   }));
   return m;

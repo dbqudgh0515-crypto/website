@@ -115,6 +115,22 @@ svg.chart .trend { fill: none; stroke: var(--color-accent-strong); stroke-width:
 }
 .goals input { margin: 2px 0 0; accent-color: var(--color-accent); width: 20px; height: 20px; flex: none; }
 .goals label:has(input:checked) { background: var(--color-accent-soft); border-color: var(--color-accent); font-weight: var(--fw-semibold); }
+/* 고른 목표의 도우미: 실천 계획 예시와 팁 */
+.goal-help { background: var(--color-bg); border-radius: var(--radius-inner); padding: var(--space-4) var(--space-5); margin: var(--space-3) 0 var(--space-4); }
+.goal-help .help-title { font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--color-ink-2); margin-bottom: var(--space-1); }
+.goal-help .plan-line { font-weight: var(--fw-semibold); color: var(--color-accent-strong); margin-bottom: 0; }
+.goal-help .plan-line + .help-title { margin-top: var(--space-4); }
+.tips { margin: 0; padding-left: 1.1em; }
+.tips li { margin-bottom: var(--space-2); line-height: var(--lh-note); }
+.tips li::marker { color: var(--color-accent); }
+.tips a { color: var(--color-accent-strong); font-size: var(--fs-small); white-space: nowrap; }
+/* 목표 제출: 버튼처럼 보이는 새 탭 링크. 목표를 고르기 전에는 누를 수 없다 */
+a.button {
+  display: block; text-align: center; text-decoration: none; border-radius: var(--radius-control);
+  padding: var(--space-4); font-size: var(--fs-button); font-weight: var(--fw-bold); margin-top: var(--space-4);
+}
+a.button.primary { background: var(--color-accent); color: var(--color-on-accent); }
+a.button[aria-disabled="true"] { background: var(--color-grid); color: var(--color-ink-2); cursor: default; }
 
 /* 입력 (공개 자가진단) */
 .inrow { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 30px; gap: 6px; align-items: center; margin-bottom: var(--space-2); }
@@ -175,6 +191,9 @@ footer { color: var(--color-ink-2); font-size: var(--fs-small); line-height: var
     transform: scale(1);
     transition: transform var(--dur-pop) var(--ease-pop) calc(var(--card-delay, 0ms) + var(--i, 0) * var(--stagger-dot));
   }
+  /* 목표를 고르면 도우미가 살짝 내려오며 나타난다 (사용자 동작에 대한 응답) */
+  .goal-help:not([hidden]) { animation: help-in var(--dur-card) var(--ease-out); }
+  @keyframes help-in { from { opacity: 0; transform: translateY(calc(var(--rise) / -2)); } to { opacity: 1; transform: none; } }
   /* 7일 평균선은 그려지듯이 (pathLength=1, 구간마다 왼쪽에서 오른쪽으로 이어서) */
   .anim > .card svg.chart .trend { stroke-dasharray: 1 1.1; stroke-dashoffset: 1.05; }
   .anim > .card.in svg.chart .trend {
