@@ -69,7 +69,8 @@ $("go").addEventListener("click", () => {
   if (!recs.length) return;
   const survey = { selfRegularity: $("selfReg").value || null, expectedWeekendDelayH: $("expDelay").value === "" ? null : Number($("expDelay").value) };
   renderResults($("out"), { records: recs, survey, classRef, feedbackText: null, storageKey: null });
-  $("out").scrollIntoView({ behavior: "smooth", block: "start" });
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;   // 움직임 줄이기면 부드러운 스크롤도 끈다
+  $("out").scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
 });
 
 for (let i = 0; i < 7; i++) addRow();

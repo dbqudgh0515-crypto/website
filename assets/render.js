@@ -4,6 +4,7 @@ import {
   computeMetrics, compareToClass, travelFor, templateText, goalOptions,
   bed18ToHhmm, minToHhmm, TRAVEL, RULES,
 } from "./calc.js";
+import { animateResults } from "./motion.js";
 
 const WD = ["월", "화", "수", "목", "금", "토", "일"];
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -32,8 +33,14 @@ function glance(m, cls, ref) {
       <div class="row"><span class="label">${label}</span><span class="value">${mine}</span></div>
       ${fin(theirs) ? `<div class="row note"><span>학급 참고 평균</span><span>${theirs}</span></div>` : ""}${bar}</div>`;
   let body = "";
-  if (fin(m.sleepMean)) body += row("평균 수면", `${hours1(m.sleepMean)}시간`, fin(mean("sleepMean")) ? `${hours1(mean("sleepMean"))}시간` : NaN,
-    cls ? posBar(cls.sleepPct, "짧은 쪽", "긴 쪽") : "");
+  if (fin(m.sleepMean)) {
+    // 학급 참고 평균 줄은 row()와 같은 조건으로 둔다. theirs가 글자라 fin(theirs)가 늘 거짓이어서 지금은 어느 줄에도 보이지 않는다.
+    // 디자인 작업에서는 화면 내용을 바꾸지 않기로 해서 그대로 두었다(고칠지는 연구자가 정함).
+    const h = hours1(m.sleepMean), theirs = fin(mean("sleepMean")) ? `${hours1(mean("sleepMean"))}시간` : NaN;
+    body += `<div class="metric hero"><div class="label">평균 수면</div>
+      <div class="hero-num"><span class="num countup" data-to="${h}" data-dec="1">${h}</span><span class="unit">시간</span></div>
+      ${fin(theirs) ? `<div class="row note"><span>학급 참고 평균</span><span>${theirs}</span></div>` : ""}${cls ? posBar(cls.sleepPct, "짧은 쪽", "긴 쪽") : ""}</div>`;
+  }
   if (fin(m.bedResidSd)) body += row("취침 시각 흔들림", `±${Math.round(m.bedResidSd)}분`, fin(mean("bedResidSd")) ? `±${Math.round(mean("bedResidSd"))}분` : NaN,
     cls ? posBar(cls.bedSdPct, "덜 흔들림", "더 흔들림") : "");
   if (fin(m.wakeResidSd)) body += row("기상 시각 흔들림", `±${Math.round(m.wakeResidSd)}분`, fin(mean("wakeResidSd")) ? `±${Math.round(mean("wakeResidSd"))}분` : NaN,
@@ -45,7 +52,7 @@ function glance(m, cls, ref) {
 
 function midSleep(m, cls, ref) {
   if (!fin(m.midMean18)) return "";
-  return card("수면 중간 시각", `<div class="row"><span>잠든 시각과 일어난 시각의 가운데</span><span class="big">${bed18ToHhmm(m.midMean18)}</span></div>
+  return card("수면 중간 시각", `<div class="lead"><span>잠든 시각과 일어난 시각의 가운데</span><span class="big">${bed18ToHhmm(m.midMean18)}</span></div>
     ${cls ? posBar(cls.midPct, "이른 쪽", "늦은 쪽") : ""}
     <p class="note">몸의 하루 리듬이 이른 편인지 늦은 편인지 볼 때 쓰는 값이에요. 어느 쪽이 정답이라는 뜻은 없어요.</p>${cls ? classNote(ref) : ""}`);
 }
@@ -54,7 +61,7 @@ function jetlag(m, cls) {
   const t = travelFor(m.socialJetlag);
   if (!t) return card("사회적 시차", `<p class="note">주말 기록 ${RULES.minWeekend}일, 평일 기록 ${RULES.minWeekday}일 이상이 있어야 계산해요.</p>`);
   const later = m.socialJetlagSigned >= 0 ? "늦게" : "일찍";
-  const chips = [`<span class="${t.city ? "" : "on"}">서울</span>`]
+  const chips = [`<span class="home${t.city ? "" : " on"}">서울</span>`]
     .concat(TRAVEL.map((x) => `<span class="${t.city === x.city ? "on" : ""}">${x.city} ${x.h}h</span>`)).join("");
   const line = t.city
     ? `주말에는 평일보다 수면 중간 시각이 약 <b>${t.hours.toFixed(1)}시간</b> ${later} 와요. 비유하면 주말마다 <b>${t.city}</b>(서울과 ${t.cityHours}시간 차이)에 다녀오는 셈이에요.`
@@ -67,7 +74,7 @@ function jetlag(m, cls) {
 function weekdays(m) {
   const any = m.byWeekday.some((w) => fin(w.bed18) || fin(w.wake));
   if (!any) return card("요일별 평균", `<p class="note">요일마다 기록이 ${RULES.minPerWeekday}일 이상 쌓이면 보여줘요.</p>`);
-  const rows = m.byWeekday.map((w) => `<tr><td>${WD[w.weekday]}</td><td>${fin(w.bed18) ? bed18ToHhmm(w.bed18) : "–"}</td><td>${fin(w.wake) ? minToHhmm(w.wake) : "–"}</td></tr>`).join("");
+  const rows = m.byWeekday.map((w) => `<tr><td${w.weekday >= 5 ? ' class="we"' : ""}>${WD[w.weekday]}</td><td>${fin(w.bed18) ? bed18ToHhmm(w.bed18) : "–"}</td><td>${fin(w.wake) ? minToHhmm(w.wake) : "–"}</td></tr>`).join("");
   return card("요일별 평균", `<table><tr><th>요일</th><th>그날 밤 잠든 시각</th><th>그날 아침 일어난 시각</th></tr>${rows}</table>
     <p class="note">요일마다 기록이 ${RULES.minPerWeekday}일 미만이면 "–"로 숨겨요. 하루짜리 값은 우연이 크기 때문이에요.</p>`);
 }
@@ -79,7 +86,7 @@ function similar(cls) {
     return card("나와 비슷한 패턴", `<p class="note">비슷한 패턴의 학급 인원이 ${RULES.minSimilarCount}명 미만이라 숫자를 보여주지 않아요.</p>`);
   const mid = ["이른", "가운데", "늦은"][s.midBin];
   const sj = s.sjBin ? "1시간 이상" : "1시간 미만";
-  return card("나와 비슷한 패턴", `<p><span class="big">${s.count}명</span> <span class="muted">/ ${s.n}명 (약 ${Math.round((s.count / s.n) * 100)}%)</span></p>
+  return card("나와 비슷한 패턴", `<p class="count"><span class="big">${s.count}명</span> <span class="muted">/ ${s.n}명 (약 ${Math.round((s.count / s.n) * 100)}%)</span></p>
     <p>수면 중간 시각이 학급에서 <b>${mid}</b> 쪽이고, 평일·주말 차이가 <b>${sj}</b>인 학생 수예요.</p>
     <p class="note">학급 참고값에서 센 인원이에요. ${RULES.minSimilarCount}명 미만인 묶음은 보여주지 않아요.</p>`);
 }
@@ -118,13 +125,21 @@ function trendChart(m) {
   const ticks = [0, Math.floor((pts.length - 1) / 2), pts.length - 1];
   ticks.forEach((i, j) => { g += `<text x="${x(i)}" y="${H - 8}" text-anchor="${["start", "middle", "end"][j]}">${pts[i].date.slice(5).replace("-", "/")}</text>`; });
   const dots = pts.map((p, i) => (fin(p.bed18) ? `<circle class="dot" cx="${x(i)}" cy="${y(p.bed18)}" r="4"/>` : "")).join("");
-  let path = "", pen = false;
-  pts.forEach((p, i) => { if (fin(p.avg7)) { path += `${pen ? "L" : "M"}${x(i).toFixed(1)},${y(p.avg7).toFixed(1)}`; pen = true; } else pen = false; });
+  const segs = [];
+  let seg = null;
+  pts.forEach((p, i) => {
+    if (!fin(p.avg7)) { seg = null; return; }
+    if (!seg) { seg = { d: "", x0: x(i), x1: x(i) }; segs.push(seg); }
+    seg.d += `${seg.d ? "L" : "M"}${x(i).toFixed(1)},${y(p.avg7).toFixed(1)}`;
+    seg.x1 = x(i);
+  });
+  const span = W - L - R;
+  const lines = segs.map((s) => `<path class="trend" pathLength="1" data-d0="${((s.x0 - L) / span).toFixed(3)}" data-dl="${Math.max(0.05, (s.x1 - s.x0) / span).toFixed(3)}" d="${s.d}"/>`).join("");
   // 기록이 없는 기간(예: 9월 기준선과 본조사 사이)이 7일 이상이면 그래프가 끊긴 이유를 알려 준다
   let gap = 0, run = 0;
   for (const p of pts) { run = fin(p.bed18) ? 0 : run + 1; gap = Math.max(gap, run); }
   const gapNote = gap >= RULES.trendWindow ? ` 기록이 없는 ${gap}일 동안은 선이 끊겨요.` : "";
-  return card("취침 시각 추세", `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="날짜별 취침 시각과 7일 평균">${g}${dots}<path class="trend" d="${path}"/></svg>
+  return card("취침 시각 추세", `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="날짜별 취침 시각과 7일 평균">${g}${dots}${lines}</svg>
     <div class="legend"><span><i class="ld"></i>날마다의 취침</span><span><i class="ll"></i>7일 평균(추세)</span></div>
     <p class="note">점이 위아래로 튀는 건 날마다의 흔들림이고, 선이 천천히 움직이는 건 추세예요. 선은 그날까지 7일 중 ${RULES.trendMinValues}일 이상 기록이 있을 때만 그려요.${gapNote}</p>`);
 }
@@ -152,6 +167,7 @@ export function renderResults(el, { records, survey, classRef, feedbackText, sto
     selfVsMeasured(m, cls, survey), trendChart(m), feedback(text, m, storageKey)].join("");
   // 보안 정책(CSP)이 HTML 속 style 속성을 막으므로 위치는 그린 뒤 JS로 넣는다
   el.querySelectorAll("[data-x]").forEach((d) => { d.style.left = `${d.dataset.x}%`; });
+  animateResults(el);
   el.querySelectorAll('input[name="goal"]').forEach((r) => r.addEventListener("change", () => {
     try { if (storageKey) localStorage.setItem(storageKey, r.value); } catch (e) { /* 저장 못 해도 화면은 그대로 */ }
   }));

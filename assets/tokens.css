@@ -1,0 +1,131 @@
+/* 디자인 토큰: 색, 글꼴, 크기, 여백, 모서리, 움직임.
+   모든 화면(공개 자가진단, 개인 결과, 뿌리 안내 페이지)은 색과 크기를 이 파일의 변수로만 쓴다.
+   style.css와 JS에는 색 값을 직접 적지 않는다.
+   다크 모드는 같은 이름에 다른 값만 넣는다(구조는 같음). */
+
+:root {
+  color-scheme: light;
+
+  /* 색: 연구자가 정한 기준 */
+  --color-bg: #F2F4F6;              /* 배경 */
+  --color-card: #FFFFFF;            /* 카드 */
+  --color-ink: #1B1D22;             /* 본문 글자 */
+  --color-ink-2: #5F6672;           /* 보조 글자 */
+  --color-accent: #3E54D3;          /* 강조(평일) */
+  --color-accent-strong: #2E40A8;   /* 진한 강조 */
+  --color-accent-soft: #E9ECFB;     /* 연한 강조 */
+  --color-weekend: #D06A1F;         /* 주말 (점·칩 같은 그래픽) */
+  --color-weekend-ink: #A8530F;     /* 주말 글자 */
+  --color-grid: #EEF0F3;            /* 격자선, 막대 바탕 */
+
+  /* 색: 위 기준에서 만든 값 */
+  --color-on-accent: #FFFFFF;       /* 강조색 버튼 위 글자 */
+  --color-weekend-soft: #F9EDE4;    /* 주말 12% + 카드 */
+  --color-border: #DCDDE0;          /* 입력칸 테두리: 보조 글자 22% + 카드 */
+  --color-band: #D8DDF6;            /* 막대의 학급 가운데 80% 띠: 강조 20% + 카드 */
+  --color-error: var(--color-weekend-ink);   /* 오류 문구. 새 색을 늘리지 않고 주말 글자색을 쓴다 */
+  --color-focus: var(--color-accent);
+
+  /* 글꼴: Pretendard(assets/fonts/pretendard, SIL OFL 1.1)를 사이트에 직접 넣었다 */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+    "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --fs-hero: 60px;      /* 평균 수면 같은 가장 큰 숫자 */
+  --fs-big: 40px;       /* 카드의 대표 숫자 */
+  --fs-value: 22px;     /* 줄 오른쪽 값 */
+  --fs-h1: 27px;
+  --fs-h2: 15px;        /* 카드 제목: 작고 진하게, 숫자가 주인공 */
+  --fs-body: 16px;
+  --fs-note: 14px;
+  --fs-small: 12.5px;
+  --fs-control: 15px;   /* 입력칸, 보조 버튼 */
+  --fs-button: 17px;    /* 주 버튼 */
+  --fs-chart: 10px;     /* 그래프 글자(SVG 좌표 단위, 화면에서 약 11px) */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-heavy: 800;
+  --lh-body: 1.65;
+  --lh-note: 1.55;
+  --lh-tight: 1.1;
+  --ls-tight: -0.025em;   /* 큰 글자는 자간을 살짝 좁힌다 */
+
+  /* 여백 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 44px;
+  --gutter: 16px;          /* 화면 양옆 */
+  --page-max: 560px;
+  --card-pad-y: 26px;
+  --card-pad-x: 22px;
+  --card-gap: 14px;
+
+  /* 모서리 */
+  --radius-card: 20px;
+  --radius-inner: 14px;    /* 카드 안 상자(안내 띠, 목표 선택지) */
+  --radius-control: 12px;  /* 입력칸, 버튼 */
+  --radius-pill: 999px;
+
+  /* 막대 위 위치 표시 */
+  --bar-h: 10px;
+  --dot-size: 22px;
+  --dot-ring: 3px;
+
+  /* 움직임: 짧고 부드럽게. prefers-reduced-motion이면 쓰지 않는다(style.css, motion.js) */
+  --ease-out: cubic-bezier(0.22, 0.8, 0.24, 1);
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-draw: cubic-bezier(0.45, 0.05, 0.3, 1);
+  --rise: 14px;            /* 카드가 올라오는 거리 */
+  --dur-card: 460ms;
+  --stagger-card: 70ms;
+  --dur-count: 900ms;      /* 평균 수면 숫자가 0부터 차오르는 시간 */
+  --dur-grow: 650ms;       /* 막대가 자라는 시간 */
+  --delay-grow: 120ms;
+  --dur-pop: 360ms;        /* 점이 톡 튀어나오는 시간 */
+  --stagger-dot: 22ms;
+  --dur-line: 950ms;       /* 7일 평균선이 그려지는 시간 */
+  --delay-line: 280ms;
+}
+
+/* 다크 모드: 같은 구조, 값만 바꾼다. 강조색은 어두운 카드 위에서 읽히도록 밝게 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-bg: #121418;
+    --color-card: #1C1F26;
+    --color-ink: #ECEEF2;
+    --color-ink-2: #A3AAB6;
+    --color-accent: #8796F4;
+    --color-accent-strong: #B6C0F8;
+    --color-accent-soft: #252C50;
+    --color-weekend: #E58C4C;
+    --color-weekend-ink: #F0A66C;
+    --color-grid: #2A2E37;
+    --color-on-accent: #11152A;
+    --color-weekend-soft: #3C302C;
+    --color-border: #3E424A;
+    --color-band: #363C57;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #121418;
+  --color-card: #1C1F26;
+  --color-ink: #ECEEF2;
+  --color-ink-2: #A3AAB6;
+  --color-accent: #8796F4;
+  --color-accent-strong: #B6C0F8;
+  --color-accent-soft: #252C50;
+  --color-weekend: #E58C4C;
+  --color-weekend-ink: #F0A66C;
+  --color-grid: #2A2E37;
+  --color-on-accent: #11152A;
+  --color-weekend-soft: #3C302C;
+  --color-border: #3E424A;
+  --color-band: #363C57;
+}

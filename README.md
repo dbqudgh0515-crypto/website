@@ -20,12 +20,18 @@
 |---|---|
 | `assets/calc.js` | 계산 엔진 (브라우저·Node 공용) |
 | `assets/render.js` | 결과 화면 |
+| `assets/tokens.css` | **디자인 토큰**: 색, 글꼴, 크기, 여백, 모서리, 움직임 값. 다크 모드도 같은 이름에 값만 바꿈. 모든 화면은 이 값만 써요 |
+| `assets/style.css`, `assets/motion.js` | 화면 모양과 등장 움직임(움직임 줄이기 설정이면 움직이지 않음) |
+| `assets/fonts/pretendard/` | Pretendard 글꼴(1.3.9, 가변 글꼴 나눔 파일). CSP 때문에 외부 CDN 대신 직접 넣음. SIL OFL 1.1, `LICENSE.txt` 함께 둠 |
 | `assets/selfcheck.js`, `assets/personal.js` | 공개 / 개인 페이지 동작 |
 | `assets/crypto.js`, `tools/seal.py` | 개인 결과 암호화(AES-256-GCM)와 풀기 |
 | `assets/class_ref.js` | 학급 참고값: 분위수와 묶음별 인원만, 개인 값 없음. `tools/make_class_ref.py`로 만듦 |
 | `tools/metrics_ref.py` | `calc.js`와 같은 계산의 파이썬 판 |
 
 `assets/class_ref.js`는 지금 **가상 학급 예시**예요. 실제 학급 참고값으로 바꾸는 건 연구자가 결정한 뒤에 해요.
+
+## 디자인 지침
+`.claude/skills/frontend-design/`: Anthropic 공식 스킬 저장소(github.com/anthropics/skills, 커밋 `dbd4588`)의 frontend-design 스킬. 마크다운 지침과 라이선스(Apache 2.0)만 있고 실행 스크립트는 없어요. 디자인 기준은 `assets/tokens.css`가 우선이에요.
 
 ## 테스트
 ```bash
