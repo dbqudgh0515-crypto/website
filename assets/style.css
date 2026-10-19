@@ -123,7 +123,12 @@ svg.chart .trend { fill: none; stroke: var(--color-accent-strong); stroke-width:
 .tips { margin: 0; padding-left: 1.1em; }
 .tips li { margin-bottom: var(--space-2); line-height: var(--lh-note); }
 .tips li::marker { color: var(--color-accent); }
-.tips a { color: var(--color-accent-strong); font-size: var(--fs-small); white-space: nowrap; }
+.tips .src { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); margin-top: 2px; }
+.tips a { color: var(--color-accent-strong); font-size: var(--fs-small); text-underline-offset: 2px; }
+.tips .lang {
+  font-size: var(--fs-small); line-height: 1.4; color: var(--color-ink-2);
+  border: 1px solid var(--color-border); border-radius: var(--radius-pill); padding: 0 var(--space-2);
+}
 /* 목표 제출: 버튼처럼 보이는 새 탭 링크. 목표를 고르기 전에는 누를 수 없다 */
 a.button {
   display: block; text-align: center; text-decoration: none; border-radius: var(--radius-control);

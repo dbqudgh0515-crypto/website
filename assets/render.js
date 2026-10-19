@@ -5,7 +5,7 @@ import {
   bed18ToHhmm, minToHhmm, TRAVEL, RULES,
 } from "./calc.js";
 import { animateResults } from "./motion.js";
-import { PLAN_EXAMPLES, TIPS, prefillUrl } from "./goals.js";
+import { PLAN_EXAMPLES, TIPS, SOURCES, prefillUrl } from "./goals.js";
 
 const WD = ["월", "화", "수", "목", "금", "토", "일"];
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -148,8 +148,13 @@ function trendChart(m) {
 // 목표 하나를 고르면 그 목표의 실천 계획 예시와 팁(출처 링크)이 보인다. 팁이 아직 없으면 예시만 보인다.
 function goalHelp(g) {
   const tips = TIPS[g.id] || [];
-  const list = tips.length ? `<p class="help-title">도움이 되는 방법</p><ul class="tips">${tips.map((t) =>
-    `<li>${esc(t.text)} <a href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">출처: ${esc(t.source)}</a></li>`).join("")}</ul>` : "";
+  const tip = (t) => {
+    const s = SOURCES[t.src];
+    if (!s) return "";
+    return `<li>${esc(t.text)}<span class="src"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer"
+      aria-label="출처: ${esc(s.name)}, ${esc(s.lang)} 페이지, 새 탭에서 열려요">출처: ${esc(s.name)}</a><span class="lang">${esc(s.lang)}</span></span></li>`;
+  };
+  const list = tips.length ? `<p class="help-title">도움이 되는 방법</p><ul class="tips">${tips.map(tip).join("")}</ul>` : "";
   return `<div class="goal-help" data-goal="${g.id}" hidden>
     <p class="help-title">실천 계획 예시</p><p class="plan-line">${esc(PLAN_EXAMPLES[g.id] || "")}</p>${list}</div>`;
 }
