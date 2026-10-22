@@ -160,7 +160,9 @@ function goalHelp(g) {
 
 // withForm이면(개인 결과 페이지) 고른 목표와 확인 코드를 채운 구글폼을 새 탭으로 여는 버튼을 둔다.
 // 없으면(공개 자가진단) 버튼 없이, 고른 목표는 이 기기에만 저장된다고 알린다.
-function feedback(text, m, storageKey, withForm) {
+// goalUntil(예: "11월 8일")이 있으면(개인 결과 페이지) 목표 기간을 조사 끝날까지로 적는다.
+// 받는 날에 따라 남은 기간이 8~14일이라 "이번 주"라고 하면 일주일 뒤 그만둘 수 있기 때문이다.
+function feedback(text, m, storageKey, withForm, goalUntil) {
   const goals = goalOptions(m);
   let saved = null;
   try { saved = storageKey ? localStorage.getItem(storageKey) : null; } catch (e) { saved = null; }
@@ -169,11 +171,13 @@ function feedback(text, m, storageKey, withForm) {
     ? `<a class="button primary goal-submit" target="_blank" rel="noopener noreferrer" aria-disabled="true">목표와 계획 제출하기</a>
     <p class="note">목표를 고른 뒤 버튼을 누르면 구글폼이 새 탭에서 열려요. 확인 코드와 고른 목표가 미리 채워져 있으니, 실천 계획 한 줄을 직접 쓰고 제출해 주세요. 이름 대신 확인 코드만 들어가고, 제출해야 연구자에게 전해져요.</p>`
     : `<p class="note">고른 목표는 이 기기 브라우저에만 저장돼요. 다른 곳으로 보내지 않아요.</p>`;
-  return card("설명과 이번 주 목표", `<p>${esc(text)}</p>
-    <p><b>이번 주에 해볼 것 하나만 골라 보세요.</b></p><div class="goals">${radios}</div>${goals.map(goalHelp).join("")}${submit}`);
+  const title = goalUntil ? `설명과 ${esc(goalUntil)}까지의 목표` : "설명과 이번 주 목표";
+  const ask = goalUntil ? `${esc(goalUntil)}까지 해 볼 것 하나만 골라 보세요.` : "이번 주에 해볼 것 하나만 골라 보세요.";
+  return card(title, `<p>${esc(text)}</p>
+    <p><b>${ask}</b></p><div class="goals">${radios}</div>${goals.map(goalHelp).join("")}${submit}`);
 }
 
-export function renderResults(el, { records, survey, classRef, feedbackText, storageKey, goalForm, checkCode }) {
+export function renderResults(el, { records, survey, classRef, feedbackText, storageKey, goalForm, checkCode, goalUntil }) {
   const m = computeMetrics(records);
   if (m.nValid < 3) {
     el.innerHTML = card("결과", `<p>쓸 수 있는 기록이 ${m.nValid}일이에요. 3일 이상이면 보여드릴게요.</p>
@@ -185,7 +189,7 @@ export function renderResults(el, { records, survey, classRef, feedbackText, sto
   const goals = goalOptions(m);
   const formOk = prefillUrl(goalForm, checkCode, goals[0].text) !== null;
   el.innerHTML = [glance(m, cls, classRef), midSleep(m, cls, classRef), jetlag(m, cls), weekdays(m), similar(cls),
-    selfVsMeasured(m, cls, survey), trendChart(m), feedback(text, m, storageKey, formOk)].join("");
+    selfVsMeasured(m, cls, survey), trendChart(m), feedback(text, m, storageKey, formOk, goalUntil)].join("");
   // 보안 정책(CSP)이 HTML 속 style 속성을 막으므로 위치는 그린 뒤 JS로 넣는다
   el.querySelectorAll("[data-x]").forEach((d) => { d.style.left = `${d.dataset.x}%`; });
   animateResults(el);
