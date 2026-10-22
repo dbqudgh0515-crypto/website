@@ -42,20 +42,20 @@ function glance(m, cls, ref) {
       <div class="hero-num"><span class="num countup" data-to="${h}" data-dec="1">${h}</span><span class="unit">시간</span></div>
       ${classMean(theirs)}${cls ? posBar(cls.sleepPct, "짧은 쪽", "긴 쪽") : ""}</div>`;
   }
-  if (fin(m.bedResidSd)) body += row("취침 시각 흔들림", `±${Math.round(m.bedResidSd)}분`, fin(mean("bedResidSd")) ? `±${Math.round(mean("bedResidSd"))}분` : null,
-    cls ? posBar(cls.bedSdPct, "덜 흔들림", "더 흔들림") : "");
-  if (fin(m.wakeResidSd)) body += row("기상 시각 흔들림", `±${Math.round(m.wakeResidSd)}분`, fin(mean("wakeResidSd")) ? `±${Math.round(mean("wakeResidSd"))}분` : null,
-    cls ? posBar(cls.wakeSdPct, "덜 흔들림", "더 흔들림") : "");
-  if (!body) return card("한눈에", `<p class="note">기록이 더 필요해요. 흔들림은 ${RULES.minDaysSd}일 이상 기록이 있어야 보여요.</p>`);
+  if (fin(m.bedResidSd)) body += row("취침 시각 편차", `±${Math.round(m.bedResidSd)}분`, fin(mean("bedResidSd")) ? `±${Math.round(mean("bedResidSd"))}분` : null,
+    cls ? posBar(cls.bedSdPct, "편차 작음", "편차 큼") : "");
+  if (fin(m.wakeResidSd)) body += row("기상 시각 편차", `±${Math.round(m.wakeResidSd)}분`, fin(mean("wakeResidSd")) ? `±${Math.round(mean("wakeResidSd"))}분` : null,
+    cls ? posBar(cls.wakeSdPct, "편차 작음", "편차 큼") : "");
+  if (!body) return card("한눈에", `<p class="note">기록이 더 필요해요. 편차는 ${RULES.minDaysSd}일 이상 기록이 있어야 보여요.</p>`);
   return card("한눈에", `<p>${m.nValid}일 기록 · 보통 ${bed18ToHhmm(m.bedMean18)}쯤 자고 ${minToHhmm(m.wakeMean)}쯤 일어났어요.</p>${body}
-    <p class="note">흔들림은 평일·주말 차이를 뺀 뒤, 날마다 앞뒤로 움직인 정도(표준편차)예요.</p>${classNote(ref)}`);
+    <p class="note">편차는 평일·주말 차이를 뺀 뒤, 날마다 앞뒤로 움직인 정도(표준편차)예요.</p>${classNote(ref)}`);
 }
 
 function midSleep(m, cls, ref) {
   if (!fin(m.midMean18)) return "";
-  return card("수면 중간 시각", `<div class="lead"><span>잠든 시각과 일어난 시각의 가운데</span><span class="big">${bed18ToHhmm(m.midMean18)}</span></div>
+  return card("수면 중간 시각", `<div class="lead"><span>잠든 시각과 일어난 시각의 평균</span><span class="big">${bed18ToHhmm(m.midMean18)}</span></div>
     ${cls ? posBar(cls.midPct, "이른 쪽", "늦은 쪽") : ""}
-    <p class="note">몸의 하루 리듬이 이른 편인지 늦은 편인지 볼 때 쓰는 값이에요. 어느 쪽이 정답이라는 뜻은 없어요.</p>${cls ? classNote(ref) : ""}`);
+    <p class="note">몸의 하루 리듬이 이른 편인지 늦은 편인지 볼 때 쓰는 값이에요.</p>${cls ? classNote(ref) : ""}`);
 }
 
 function jetlag(m, cls) {
@@ -68,8 +68,7 @@ function jetlag(m, cls) {
     ? `주말에는 평일보다 수면 중간 시각이 약 <b>${t.hours.toFixed(1)}시간</b> ${later} 와요. 비유하면 주말마다 <b>${t.city}</b>(서울과 ${t.cityHours}시간 차이)에 다녀오는 셈이에요.`
     : `주말과 평일의 수면 중간 시각 차이가 30분이 안 돼요. <b>거의 서울 안</b>에서 지내는 셈이에요.`;
   return card("사회적 시차 · 주말 시차 여행", `<p>${line}</p><div class="trip">${chips}</div>
-    ${cls ? posBar(cls.sjPct, "차이 작음", "차이 큼") : ""}
-    <p class="note">비유예요. 실제로 시차 증상이 있다는 뜻은 아니고, 평일과 주말 리듬의 차이를 거리로 바꿔 본 거예요.</p>`);
+    ${cls ? posBar(cls.sjPct, "차이 작음", "차이 큼") : ""}`);
 }
 
 function weekdays(m) {
@@ -100,7 +99,7 @@ function selfVsMeasured(m, cls, survey) {
     const think = ((s - 1) / 4) * 100, real = 100 - cls.bedSdPct;
     const extra = `<div class="me alt" data-x="${Math.min(97, Math.max(3, think))}" title="내 생각"></div>`;
     body += `<div class="metric"><div class="label">생활 규칙성</div>${posBar(real, "덜 규칙적", "더 규칙적", extra)}
-      <p class="note">빈 원: 시작 설문에서 고른 ${s}점(1~5) · 파란 점: 기록으로 본 취침 흔들림의 학급 내 위치</p></div>`;
+      <p class="note">빈 원: 시작 설문에서 고른 ${s}점(1~5) · 파란 점: 기록으로 본 취침 시각 편차의 학급 내 위치</p></div>`;
   }
   const e = Number(survey.expectedWeekendDelayH);
   if (survey.expectedWeekendDelayH !== null && survey.expectedWeekendDelayH !== undefined && survey.expectedWeekendDelayH !== "" && fin(e) && fin(m.wakeGap)) {
@@ -109,7 +108,7 @@ function selfVsMeasured(m, cls, survey) {
       <div class="row"><span>기록</span><span class="value">${(m.wakeGap / 60).toFixed(1)}시간</span></div></div>`;
   }
   if (!body) return "";
-  return card("내 생각과 기록 비교", body + `<p class="note">생각과 기록이 다른 건 흔한 일이에요. 어느 쪽이 틀렸다는 뜻은 아니에요.</p>`);
+  return card("내 생각과 기록 비교", body + `<p class="note">생각과 기록이 다른 건 흔한 일이에요.</p>`);
 }
 
 function trendChart(m) {
@@ -142,7 +141,7 @@ function trendChart(m) {
   const gapNote = gap >= RULES.trendWindow ? ` 기록이 없는 ${gap}일 동안은 선이 끊겨요.` : "";
   return card("취침 시각 추세", `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="날짜별 취침 시각과 7일 평균">${g}${dots}${lines}</svg>
     <div class="legend"><span><i class="ld"></i>날마다의 취침</span><span><i class="ll"></i>7일 평균(추세)</span></div>
-    <p class="note">점이 위아래로 튀는 건 날마다의 흔들림이고, 선이 천천히 움직이는 건 추세예요. 선은 그날까지 7일 중 ${RULES.trendMinValues}일 이상 기록이 있을 때만 그려요.${gapNote}</p>`);
+    <p class="note">점이 위아래로 튀는 건 날마다의 차이이고, 선이 천천히 움직이는 건 추세예요. 선은 그날까지 7일 중 ${RULES.trendMinValues}일 이상 기록이 있을 때만 그려요.${gapNote}</p>`);
 }
 
 // 목표 하나를 고르면 그 목표의 실천 계획 예시와 팁(출처 링크)이 보인다. 팁이 아직 없으면 예시만 보인다.

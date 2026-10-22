@@ -6,7 +6,7 @@ export const RULES = {
   bedWindowMax18: 12 * 60,   // 취침 시각이 18:00 기준 12시간(=06:00) 넘으면 오류
   sleepMin: 180,             // 수면 3시간 미만이면 그날 취침·기상·수면 제외
   sleepMax: 840,             // 수면 14시간 초과면 제외
-  minDaysSd: 5,              // 흔들림(표준편차) 계산에 필요한 최소 기록 수
+  minDaysSd: 5,              // 편차(표준편차) 계산에 필요한 최소 기록 수
   minWeekend: 2,             // 사회적 시차·주말 차이에 필요한 최소 주말 기록
   minWeekday: 3,             // 사회적 시차·주말 차이에 필요한 최소 평일 기록
   minPerWeekday: 2,          // 요일별 평균: 요일당 이보다 적으면 숨김
@@ -237,10 +237,9 @@ export function templateText(m, cls) {
       : `주말과 평일의 수면 중간 시각 차이는 30분이 안 돼요. 거의 서울 안에서 지내는 셈이에요.`);
   }
   if (cls && Number.isFinite(cls.bedSdPct)) {
-    out.push(`취침 흔들림은 학급 참고값 막대에서 ${cls.bedSdPct < 50 ? "작은 쪽" : "큰 쪽"}에 있어요. 좋고 나쁨이 아니라 위치만 보여주는 거예요.`);
+    out.push(`취침 시각 편차는 학급 참고값 막대에서 ${cls.bedSdPct < 50 ? "작은 쪽" : "큰 쪽"}에 있어요.`);
   }
   if (m.nValid < 10) out.push("기록이 10일보다 적어서 결과가 달라질 수 있어요.");
-  out.push("이 결과는 기록한 기간의 패턴을 정리한 것이고, 건강 상태를 판단하는 것이 아니에요.");
   return out.join(" ");
 }
 
