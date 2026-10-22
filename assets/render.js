@@ -5,7 +5,8 @@ import {
   bed18ToHhmm, minToHhmm, TRAVEL, RULES,
 } from "./calc.js";
 import { animateResults } from "./motion.js";
-import { PLAN_EXAMPLES, TIPS, SOURCES, prefillUrl } from "./goals.js";
+import { PLAN_EXAMPLES, TIPS, SOURCES } from "./goals.js";
+import { submitNetlifyForm } from "./netlify-form.js";
 
 const WD = ["월", "화", "수", "목", "금", "토", "일"];
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -158,9 +159,9 @@ function goalHelp(g) {
     <p class="help-title">실천 계획 예시</p><p class="plan-line">${esc(PLAN_EXAMPLES[g.id] || "")}</p>${list}</div>`;
 }
 
-// withForm이면(개인 결과 페이지) 고른 목표와 확인 코드를 채운 구글폼을 새 탭으로 여는 버튼을 둔다.
-// 없으면(공개 자가진단) 버튼 없이, 고른 목표는 이 기기에만 저장된다고 알린다.
-// goalUntil(예: "11월 8일")이 있으면(개인 결과 페이지) 목표 기간을 조사 끝날까지로 적는다.
+// withForm이면(개인 결과 페이지) 이 페이지 안에서 목표와 실천 계획 한 줄을 제출한다(Netlify Forms "goal-submit").
+// 확인 코드는 숨은 칸으로 자동으로 붙는다. 없으면(공개 자가진단) 제출 없이, 고른 목표는 이 기기에만 저장된다고 알린다.
+// goalUntil(예: "11월 12일")이 있으면(개인 결과 페이지) 목표 기간을 조사 끝날까지로 적는다.
 // 받는 날에 따라 남은 기간이 8~14일이라 "이번 주"라고 하면 일주일 뒤 그만둘 수 있기 때문이다.
 function feedback(text, m, storageKey, withForm, goalUntil) {
   const goals = goalOptions(m);
@@ -168,8 +169,14 @@ function feedback(text, m, storageKey, withForm, goalUntil) {
   try { saved = storageKey ? localStorage.getItem(storageKey) : null; } catch (e) { saved = null; }
   const radios = goals.map((g) => `<label><input type="radio" name="goal" value="${g.id}" ${saved === g.id ? "checked" : ""}><span>${esc(g.text)}</span></label>`).join("");
   const submit = withForm
-    ? `<a class="button primary goal-submit" target="_blank" rel="noopener noreferrer" aria-disabled="true">목표와 계획 제출하기</a>
-    <p class="note">목표를 고른 뒤 버튼을 누르면 구글폼이 새 탭에서 열려요. 확인 코드와 고른 목표가 미리 채워져 있으니, 실천 계획 한 줄을 직접 쓰고 제출해 주세요. 이름 대신 확인 코드만 들어가고, 제출해야 연구자에게 전해져요.</p>`
+    ? `<form class="goal-form" novalidate>
+      <label class="field-label" for="goal-plan">실천 계획 한 줄 <span class="req">필수</span></label>
+      <input id="goal-plan" name="plan" type="text" maxlength="200" autocomplete="off" placeholder="만약 ~하면, ~한다." required>
+      <p class="hp" aria-hidden="true"><label>비워 두세요 <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+      <button type="submit" class="primary goal-submit" disabled>목표와 계획 제출하기</button>
+      <p class="form-msg" role="status" aria-live="polite"></p>
+    </form>
+    <p class="note">목표를 고르고 실천 계획 한 줄을 쓴 뒤 제출해 주세요. 이름 대신 확인 코드만 함께 보내고, 제출해야 연구자에게 전해져요. 다시 제출하면 마지막에 낸 것으로 바뀌어요.</p>`
     : `<p class="note">고른 목표는 이 기기 브라우저에만 저장돼요. 다른 곳으로 보내지 않아요.</p>`;
   const title = goalUntil ? `설명과 ${esc(goalUntil)}까지의 목표` : "설명과 이번 주 목표";
   const ask = goalUntil ? `${esc(goalUntil)}까지 해 볼 것 하나만 골라 보세요.` : "이번 주에 해볼 것 하나만 골라 보세요.";
@@ -177,7 +184,31 @@ function feedback(text, m, storageKey, withForm, goalUntil) {
     <p><b>${ask}</b></p><div class="goals">${radios}</div>${goals.map(goalHelp).join("")}${submit}`);
 }
 
-export function renderResults(el, { records, survey, classRef, feedbackText, storageKey, goalForm, checkCode, goalUntil }) {
+// 목표 제출: 같은 사이트로 POST. 성공·실패를 알려 주고, 실패해도 쓴 글은 그대로 둔다(이 기기에도 임시 저장).
+function setupGoalForm(form, { goals, chosen, ready, checkCode, draftKey }) {
+  const msg = form.querySelector(".form-msg"), btn = form.querySelector(".goal-submit");
+  try { const d = draftKey && localStorage.getItem(draftKey); if (d) form.plan.value = d; } catch (e) { /* 없으면 빈칸 */ }
+  form.plan.addEventListener("input", () => {
+    ready();
+    try { if (draftKey) localStorage.setItem(draftKey, form.plan.value); } catch (e) { /* 저장 못 해도 진행 */ }
+  });
+  ready();
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const c = chosen(), plan = form.plan.value.trim();
+    if (!c || !plan) { msg.className = "form-msg err"; msg.textContent = "목표를 고르고 실천 계획 한 줄을 써 주세요."; return; }
+    const goal = goals.find((x) => x.id === c.value);
+    btn.disabled = true; msg.className = "form-msg"; msg.textContent = "보내는 중이에요…";
+    const ok = await submitNetlifyForm("goal-submit", { code: checkCode, goal: goal ? goal.text : c.value, plan,
+      "bot-field": form.elements["bot-field"].value });
+    msg.className = ok ? "form-msg ok" : "form-msg err";
+    msg.textContent = ok ? "제출했어요. 고마워요. 다시 제출하면 마지막에 낸 것으로 바뀌어요."
+      : "제출하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요. 쓴 내용은 그대로 있어요.";
+    ready();
+  });
+}
+
+export function renderResults(el, { records, survey, classRef, feedbackText, storageKey, checkCode, goalUntil }) {
   const m = computeMetrics(records);
   if (m.nValid < 3) {
     el.innerHTML = card("결과", `<p>쓸 수 있는 기록이 ${m.nValid}일이에요. 3일 이상이면 보여드릴게요.</p>
@@ -187,24 +218,24 @@ export function renderResults(el, { records, survey, classRef, feedbackText, sto
   const cls = compareToClass(m, classRef);
   const text = feedbackText || templateText(m, cls);
   const goals = goalOptions(m);
-  const formOk = prefillUrl(goalForm, checkCode, goals[0].text) !== null;
+  const formOk = /^[0-9a-f]{8}$/.test(checkCode || "");      // 개인 결과 페이지에서만 확인 코드가 있다
   el.innerHTML = [glance(m, cls, classRef), midSleep(m, cls, classRef), jetlag(m, cls), weekdays(m), similar(cls),
     selfVsMeasured(m, cls, survey), trendChart(m), feedback(text, m, storageKey, formOk, goalUntil)].join("");
   // 보안 정책(CSP)이 HTML 속 style 속성을 막으므로 위치는 그린 뒤 JS로 넣는다
   el.querySelectorAll("[data-x]").forEach((d) => { d.style.left = `${d.dataset.x}%`; });
   animateResults(el);
-  const submitEl = el.querySelector(".goal-submit");
+  const form = el.querySelector(".goal-form");
+  const chosen = () => el.querySelector('input[name="goal"]:checked');
+  const ready = () => { if (form) form.querySelector(".goal-submit").disabled = !(chosen() && form.plan.value.trim()); };
   const choose = (id) => {
     el.querySelectorAll(".goal-help").forEach((h) => { h.hidden = h.dataset.goal !== id; });
-    const g = goals.find((x) => x.id === id);
-    const url = submitEl && g ? prefillUrl(goalForm, checkCode, g.text) : null;
-    if (url) { submitEl.href = url; submitEl.removeAttribute("aria-disabled"); }
+    ready();
   };
-  const checked = el.querySelector('input[name="goal"]:checked');
-  if (checked) choose(checked.value);
+  if (chosen()) choose(chosen().value);
   el.querySelectorAll('input[name="goal"]').forEach((r) => r.addEventListener("change", () => {
     choose(r.value);
     try { if (storageKey) localStorage.setItem(storageKey, r.value); } catch (e) { /* 저장 못 해도 화면은 그대로 */ }
   }));
+  if (form) setupGoalForm(form, { goals, chosen, ready, checkCode, draftKey: storageKey ? `${storageKey}-plan` : null });
   return m;
 }

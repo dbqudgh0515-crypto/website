@@ -42,16 +42,3 @@ export const TIPS = {
       quote: "putting your phone on silent to avoid interruptions / placing your phone face down to reduce light" },
   ],
 };
-
-// 목표 제출 폼 미리 채우기 주소. form은 암호문에 든 { base, codeEntry, goalEntry }와 확인 코드(code).
-// 형식이 하나라도 어긋나면 null을 돌려줘서 버튼을 만들지 않는다.
-const FORM_BASE = /^https:\/\/docs\.google\.com\/forms\/d\/e\/[A-Za-z0-9_-]+\/viewform$/;
-const ENTRY = /^entry\.\d+$/;
-export function prefillUrl(form, code, goalText) {
-  if (!form || !FORM_BASE.test(form.base || "") || !ENTRY.test(form.codeEntry || "") || !ENTRY.test(form.goalEntry || "")) return null;
-  if (!/^[0-9a-f]{8}$/.test(code || "") || !goalText) return null;
-  const q = new URLSearchParams({ usp: "pp_url" });
-  q.set(form.codeEntry, code);
-  q.set(form.goalEntry, goalText);
-  return `${form.base}?${q}`;
-}

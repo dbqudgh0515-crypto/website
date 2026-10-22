@@ -164,6 +164,42 @@ details summary { cursor: pointer; color: var(--color-ink-2); font-size: var(--f
 .err { color: var(--color-error); font-size: var(--fs-note); font-weight: var(--fw-medium); }
 .err:empty { display: none; }
 
+/* 폼 공통 (시작 설문, 목표 제출) */
+.start-form .field { margin-bottom: var(--space-5); }
+fieldset.field { border: 0; padding: 0; margin: 0 0 var(--space-5); min-width: 0; }
+.start-form .field-label, .goal-form .field-label { display: block; font-weight: var(--fw-semibold); font-size: var(--fs-body); color: var(--color-ink); margin-bottom: var(--space-2); line-height: 1.5; padding: 0; }
+.req { font-size: var(--fs-small); font-weight: var(--fw-semibold); color: var(--color-accent-strong); margin-left: var(--space-1); }
+.start-form .field-help { margin: calc(var(--space-1) * -1) 0 var(--space-2); }
+.start-form input[type=text], .goal-form input[type=text], .with-unit input {
+  width: 100%; min-width: 0; font: inherit; font-size: var(--fs-control); color: var(--color-ink);
+  padding: 11px var(--space-3); background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius-control);
+}
+.with-unit { display: flex; align-items: center; gap: var(--space-2); max-width: 200px; }
+.with-unit span { color: var(--color-ink-2); white-space: nowrap; }
+.scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-2); }
+.scale label { position: relative; }
+.scale input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.scale span {
+  display: block; text-align: center; padding: var(--space-3) 0; border-radius: var(--radius-control);
+  background: var(--color-bg); border: 1.5px solid transparent; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; cursor: pointer;
+}
+.scale input:checked + span { background: var(--color-accent-soft); border-color: var(--color-accent); color: var(--color-accent-strong); }
+.scale input:focus-visible + span { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.scale + .ends { margin-top: var(--space-2); }
+.consent-list { margin: 0; padding-left: 1.1em; }
+.consent-list li { margin-bottom: var(--space-2); line-height: var(--lh-note); }
+.consent-list li::marker { color: var(--color-accent); }
+.consent-check label { color: var(--color-ink); font-size: var(--fs-body); font-weight: var(--fw-medium); display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4); background: var(--color-bg); border-radius: var(--radius-inner); cursor: pointer; line-height: 1.5; }
+.consent-check input { margin: 2px 0 0; accent-color: var(--color-accent); width: 20px; height: 20px; flex: none; }
+.goal-form { margin-top: var(--space-4); }
+.goal-form .goal-submit, .start-form button.primary { margin-top: var(--space-4); }
+button.primary:disabled { background: var(--color-grid); color: var(--color-ink-2); cursor: default; }
+.hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.form-msg { font-size: var(--fs-note); font-weight: var(--fw-medium); margin: var(--space-3) 0 0; color: var(--color-ink-2); }
+.form-msg:empty { display: none; }
+.form-msg.ok { color: var(--color-accent-strong); }
+.form-msg.err { color: var(--color-error); }
+
 footer { color: var(--color-ink-2); font-size: var(--fs-small); line-height: var(--lh-note); text-align: center; margin-top: var(--space-7); }
 
 /* 움직임: motion.js가 결과 영역에 .anim을 붙이고, 카드가 화면에 들어오면 .in을 붙인다.

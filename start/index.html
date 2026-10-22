@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 같은 사이트로만 응답을 보낸다(connect-src 'self'). 외부 요청 없음. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>생활리듬 기록 시작 설문</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<main>
+  <h1>생활리듬 기록 시작 설문</h1>
+  <p class="sub">기록을 시작하기 전에 한 번만 답해 주세요. 1분이면 끝나요.</p>
+
+  <section class="card">
+    <h2>참여 안내</h2>
+    <ul class="consent-list">
+      <li>기록 기간은 <b>10월 23일(금)부터 11월 12일(목)까지</b>예요. 매일 아침 기록 폼에 잠든 시각과 일어난 시각을 적어요.</li>
+      <li>이름은 분석하기 전에 번호로 바뀌어요.</li>
+      <li>언제든 그만둘 수 있어요. 그만두면 그동안의 기록을 지워요.</li>
+      <li>결과는 본인에게만 개인 메시지로 전달해요.</li>
+      <li>이 설문의 응답은 연구자만 보고, 분석이 끝나면 사이트에 남은 응답을 지워요.</li>
+    </ul>
+  </section>
+
+  <!-- Netlify Forms가 배포할 때 이 폼을 알아본다. 제출은 start.js가 같은 사이트로 fetch POST 한다. -->
+  <form class="card start-form" name="start-survey" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+    <div class="field">
+      <label class="field-label" for="name">이름 <span class="req">필수</span></label>
+      <p class="note field-help">매일 기록 폼에 쓰는 이름과 똑같이 써 주세요.</p>
+      <input id="name" name="name" type="text" maxlength="40" autocomplete="name" required>
+    </div>
+
+    <fieldset class="field">
+      <legend class="field-label">기록을 시작하기 전, 평소 내가 잠드는 시각은 얼마나 규칙적이었나요? <span class="req">필수</span></legend>
+      <div class="scale">
+        <label><input type="radio" name="regularity" value="1" required><span>1</span></label>
+        <label><input type="radio" name="regularity" value="2"><span>2</span></label>
+        <label><input type="radio" name="regularity" value="3"><span>3</span></label>
+        <label><input type="radio" name="regularity" value="4"><span>4</span></label>
+        <label><input type="radio" name="regularity" value="5"><span>5</span></label>
+      </div>
+      <div class="ends"><span>1 매우 들쭉날쭉</span><span>5 매우 규칙적</span></div>
+    </fieldset>
+
+    <div class="field">
+      <label class="field-label" for="weekend_delay">평소 주말에는 평일보다 몇 시간 늦게 일어난다고 생각하나요? <span class="req">필수</span></label>
+      <div class="with-unit">
+        <input id="weekend_delay" name="weekend_delay" type="number" min="0" max="12" step="0.5" inputmode="decimal" placeholder="예: 1.5" required>
+        <span>시간</span>
+      </div>
+      <p class="note field-help">0부터 12까지, 0.5 단위로 적어요. 평일과 비슷하면 0이에요.</p>
+    </div>
+
+    <div class="field consent-check">
+      <label><input type="checkbox" name="consent" value="동의함" required><span>위 안내를 읽었고 연구 참여에 동의해요. <span class="req">필수</span></span></label>
+    </div>
+
+    <p class="hp" aria-hidden="true"><label>비워 두세요 <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+    <button type="submit" class="primary">제출하기</button>
+    <p class="form-msg" role="status" aria-live="polite"></p>
+  </form>
+
+  <footer>응답은 이 사이트(Netlify)로만 보내고, 다른 곳으로 보내지 않아요.</footer>
+</main>
+<script type="module" src="../assets/start.js"></script>
+</body>
+</html>

@@ -35,12 +35,12 @@ async function main() {
   } catch (e) { return fail("인터넷 연결을 확인해 주세요."); }
   let p;
   try { p = await openSealed(bytes, link.k); } catch (e) { return fail("링크가 잘렸거나 바뀐 것 같아요."); }
-  // 예: "본조사 10/19~10/26 기록 (10/26 아침 기록까지 반영)"
+  // 예: "본조사 10/23~10/30 기록 (10/30 아침 기록까지 반영)"
   meta.textContent = p.periodNote || (p.generatedAt ? `${p.generatedAt} 아침 기록까지 반영` : "");
   renderResults(out, { records: p.records, survey: p.survey, classRef: p.classRef,
     feedbackText: p.feedback && p.feedback.text, storageKey: `goal-${link.i}`,
-    // 목표 제출 폼: 확인 코드 = 파일 ID 앞 8자 (연구자 링크 목록의 check_code와 같다)
-    goalForm: p.goalForm, checkCode: link.i.slice(0, 8),
-    goalUntil: p.goalUntil });                          // 목표 기간: 조사 마지막 날 (예: "11월 8일")
+    // 목표 제출: 확인 코드 = 파일 ID 앞 8자 (연구자 링크 목록의 check_code와 같다)
+    checkCode: link.i.slice(0, 8),
+    goalUntil: p.goalUntil });                          // 목표 기간: 조사 마지막 날 (예: "11월 12일")
 }
 main();
