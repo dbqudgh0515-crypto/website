@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 같은 사이트로만 응답을 보낸다(connect-src 'self'). 외부 요청 없음. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>생활리듬 기록 사용 후기</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<main>
+  <h1>생활리듬 기록 사용 후기</h1>
+  <p class="sub">기록이 끝났어요. 끝까지 참여해 줘서 고마워요. 2분이면 끝나요.</p>
+
+  <section class="card">
+    <h2>안내</h2>
+    <ul class="consent-list">
+      <li>결과 페이지와 기록을 해 보면서 느낀 점을 물어봐요.</li>
+      <li>이름은 분석하기 전에 번호로 바뀌어요.</li>
+      <li>이 설문의 응답은 연구자만 보고, 분석이 끝나면 사이트에 남은 응답을 지워요.</li>
+    </ul>
+  </section>
+
+  <!-- Netlify Forms가 배포할 때 이 폼을 알아본다. 제출은 review.js가 같은 사이트로 fetch POST 한다.
+       문항과 순서는 사전등록 9장 그대로다. -->
+  <form class="card review-form" name="review-survey" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+    <div class="field">
+      <label class="field-label" for="name">이름 <span class="req">필수</span></label>
+      <p class="note field-help">매일 기록 폼에 쓰는 이름과 똑같이 써 주세요.</p>
+      <input id="name" name="name" type="text" maxlength="40" autocomplete="name" required>
+    </div>
+
+    <fieldset class="field">
+      <legend class="field-label">결과 링크를 몇 번 열어 봤나요? <span class="req">필수</span></legend>
+      <div class="scale c4">
+        <label><input type="radio" name="opens" value="0" required><span>0번</span></label>
+        <label><input type="radio" name="opens" value="1"><span>1번</span></label>
+        <label><input type="radio" name="opens" value="2~3"><span>2~3번</span></label>
+        <label><input type="radio" name="opens" value="4번 이상"><span>4번 이상</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend class="field-label">웹페이지 내용을 이해하기 쉬웠나요? <span class="req">필수</span></legend>
+      <div class="scale">
+        <label><input type="radio" name="understand" value="1" required><span>1</span></label>
+        <label><input type="radio" name="understand" value="2"><span>2</span></label>
+        <label><input type="radio" name="understand" value="3"><span>3</span></label>
+        <label><input type="radio" name="understand" value="4"><span>4</span></label>
+        <label><input type="radio" name="understand" value="5"><span>5</span></label>
+      </div>
+      <div class="ends"><span>1 전혀 아니에요</span><span>5 매우 그래요</span></div>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend class="field-label">내 생활을 돌아보는 데 도움이 됐나요? <span class="req">필수</span></legend>
+      <div class="scale">
+        <label><input type="radio" name="helpful" value="1" required><span>1</span></label>
+        <label><input type="radio" name="helpful" value="2"><span>2</span></label>
+        <label><input type="radio" name="helpful" value="3"><span>3</span></label>
+        <label><input type="radio" name="helpful" value="4"><span>4</span></label>
+        <label><input type="radio" name="helpful" value="5"><span>5</span></label>
+      </div>
+      <div class="ends"><span>1 전혀 아니에요</span><span>5 매우 그래요</span></div>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend class="field-label">결과를 보고 바꿔 본 것이 있나요? <span class="req">필수</span></legend>
+      <div class="scale c2">
+        <label><input type="radio" name="changed" value="예" required><span>예</span></label>
+        <label><input type="radio" name="changed" value="아니오"><span>아니오</span></label>
+      </div>
+    </fieldset>
+    <div class="field">
+      <label class="field-label" for="changed_what">있다면 무엇인가요?</label>
+      <p class="note field-help">"예"라면 적어 주세요.</p>
+      <textarea id="changed_what" name="changed_what" rows="3" maxlength="500"></textarea>
+    </div>
+
+    <fieldset class="field">
+      <legend class="field-label">고른 목표를 얼마나 지켰나요? <span class="req">필수</span></legend>
+      <div class="scale">
+        <label><input type="radio" name="goal_kept" value="1" required><span>1</span></label>
+        <label><input type="radio" name="goal_kept" value="2"><span>2</span></label>
+        <label><input type="radio" name="goal_kept" value="3"><span>3</span></label>
+        <label><input type="radio" name="goal_kept" value="4"><span>4</span></label>
+        <label><input type="radio" name="goal_kept" value="5"><span>5</span></label>
+      </div>
+      <div class="ends"><span>1 거의 못 지켰어요</span><span>5 잘 지켰어요</span></div>
+      <div class="scale c1">
+        <label><input type="radio" name="goal_kept" value="고르지 않음"><span>목표를 고르지 않았어요</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend class="field-label">실천 계획 한 줄을 떠올린 적이 있나요? <span class="req">필수</span></legend>
+      <div class="scale c3">
+        <label><input type="radio" name="plan_recall" value="거의 없음" required><span>거의 없음</span></label>
+        <label><input type="radio" name="plan_recall" value="가끔"><span>가끔</span></label>
+        <label><input type="radio" name="plan_recall" value="자주"><span>자주</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend class="field-label">팁이 도움이 됐나요? <span class="req">필수</span></legend>
+      <div class="scale">
+        <label><input type="radio" name="tips" value="1" required><span>1</span></label>
+        <label><input type="radio" name="tips" value="2"><span>2</span></label>
+        <label><input type="radio" name="tips" value="3"><span>3</span></label>
+        <label><input type="radio" name="tips" value="4"><span>4</span></label>
+        <label><input type="radio" name="tips" value="5"><span>5</span></label>
+      </div>
+      <div class="ends"><span>1 전혀 아니에요</span><span>5 매우 그래요</span></div>
+    </fieldset>
+
+    <div class="field">
+      <label class="field-label" for="problems">불편했거나 틀렸다고 느낀 내용이 있나요?</label>
+      <textarea id="problems" name="problems" rows="3" maxlength="1000"></textarea>
+    </div>
+
+    <fieldset class="field">
+      <legend class="field-label">본인 결과를 받기 전에 다른 친구의 결과 화면을 보거나 내용을 들은 적이 있나요? <span class="req">필수</span></legend>
+      <p class="note field-help">솔직하게 답해 주세요. 어떤 답이든 괜찮아요.</p>
+      <div class="scale c2">
+        <label><input type="radio" name="contaminated" value="예" required><span>예</span></label>
+        <label><input type="radio" name="contaminated" value="아니오"><span>아니오</span></label>
+      </div>
+    </fieldset>
+
+    <p class="hp" aria-hidden="true"><label>비워 두세요 <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+    <button type="submit" class="primary">제출하기</button>
+    <p class="form-msg" role="status" aria-live="polite"></p>
+  </form>
+
+  <footer>응답은 이 사이트(Netlify)로만 보내고, 다른 곳으로 보내지 않아요.</footer>
+</main>
+<script type="module" src="../assets/review.js"></script>
+</body>
+</html>
