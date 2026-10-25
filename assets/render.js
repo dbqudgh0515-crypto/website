@@ -1,11 +1,12 @@
 // 결과 화면 그리기. 개인 결과 페이지와 공개 자가진단이 같이 쓴다.
 // 유형 이름을 붙이지 않고, 학급 참고 막대 위의 위치로만 보여준다. 진단·단정 표현은 쓰지 않는다.
 import {
-  computeMetrics, compareToClass, travelFor, templateText, goalOptions,
+  computeMetrics, compareToClass, travelFor, templateText, goalOptions, cleanRecords,
   bed18ToHhmm, minToHhmm, TRAVEL, RULES,
 } from "./calc.js";
 import { animateResults } from "./motion.js";
 import { PLAN_EXAMPLES, TIPS, SOURCES } from "./goals.js";
+import { OECD_SLEEP, KR_TEEN_WEEKDAY, WORLD_SOURCES } from "./world.js";
 import { submitNetlifyForm } from "./netlify-form.js";
 
 const WD = ["월", "화", "수", "목", "금", "토", "일"];
@@ -92,6 +93,70 @@ function similar(cls) {
     <p class="note">학급 참고값에서 센 인원이에요. ${RULES.minSimilarCount}명 미만인 묶음은 보여주지 않아요.</p>`);
 }
 
+// "7시간 51분"처럼. 1시간이 안 되면 "17분", 딱 떨어지면 "8시간"
+function hm(min) {
+  const t = Math.round(min), h = Math.floor(t / 60), mi = t % 60;
+  if (!h) return `${mi}분`;
+  return mi ? `${h}시간 ${mi}분` : `${h}시간`;
+}
+// 앞 낱말에 받침이 있으면 a, 없으면 b (예: 영국이에요, 캐나다예요)
+function josa(word, a, b) {
+  const c = String(word).trim().slice(-1).charCodeAt(0);
+  return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 ? a : b;
+}
+function srcLink(s) {
+  return `<span class="src"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer"
+    aria-label="출처: ${esc(s.name)}, ${esc(s.lang)} 자료, 새 탭에서 열려요">출처: ${esc(s.name)}</a><span class="lang">${esc(s.lang)}</span></span>`;
+}
+
+// 세계와 비교: OECD가 모은 33개 나라의 하루 평균 수면 순위(한국의 자리)와, 그 사이에 내 평균을 넣어 본 자리,
+// 한국 중고등학생 주중 평균. 숫자는 world.js의 출처 그대로이고 위치만 보여 준다. rows는 cleanRecords 결과(평일 평균 계산용).
+function world(m, rows) {
+  if (!fin(m.sleepMean)) return "";
+  const list = OECD_SLEEP, mine = m.sleepMean;
+  const all = list.map((c) => ({ ...c })).concat({ name: "나", min: mine, me: true }).sort((a, b) => b.min - a.min);
+  const meI = all.findIndex((r) => r.me), krI = all.findIndex((r) => r.name === "한국");
+  const kr = list.find((c) => c.name === "한국"), krRank = list.indexOf(kr) + 1;
+  const top = list[0], last = list[list.length - 1];
+  const avg = list.reduce((s, c) => s + c.min, 0) / list.length;
+  const lo = 360, hi = Math.max(top.min, mine);                      // 막대는 6시간에서 시작해 차이가 잘 보이게
+  const w = (v) => Math.min(100, Math.max(3, ((v - lo) / (hi - lo)) * 100)).toFixed(1);
+  const li = (r, i) => `<li class="lb-row${r.me ? " me" : ""}${r.name === "한국" ? " kr" : ""}"><span class="lb-rank">${i + 1}</span>`
+    + `<span class="lb-name">${esc(r.name)}</span><span class="lb-time">${hm(r.min)}</span><span class="lb-bar"><i data-w="${w(r.min)}"></i></span></li>`;
+  const show = [...new Set([0, 1, 2, meI - 1, meI, meI + 1, krI, all.length - 1])].filter((i) => i >= 0 && i < all.length).sort((a, b) => a - b);
+  let short = "", prev = -1;
+  for (const i of show) {
+    if (i > prev + 1) short += `<li class="lb-gap" aria-hidden="true">⋯</li>`;
+    short += li(all[i], i);
+    prev = i;
+  }
+  const diff = top.min - kr.min;
+  const facts = [
+    `가장 짧은 나라는 ${last.name}(${hm(last.min)}), 가장 긴 나라는 ${top.name}(${hm(top.min)})${josa(top.name, "이에요", "예요")}.
+      ${top.name}${josa(top.name, "과", "와")} 한국은 하루 ${hm(diff)} 차이라서, 1년이면 약 ${Math.round((diff * 365) / 1440)}일이에요.`,
+    `내 평균 ${hm(mine)}을 이 표에 넣으면 ${all.length}자리 중 <b>${meI + 1}번째</b>예요.`,
+    `${list.length}개 나라 평균은 ${hm(avg)}이에요. 내 평균과는 하루 ${hm(Math.abs(avg - mine))} 차이예요.`,
+    `내 평균대로라면 1년에 약 ${Math.round((mine * 365) / 1440)}일을 자는 셈이에요.`,
+  ];
+  const wd = rows.filter((r) => !r.weekend && fin(r.sleep)).map((r) => r.sleep);
+  const myWd = wd.length >= RULES.minWeekday ? wd.reduce((s, x) => s + x, 0) / wd.length : NaN;
+  const t = KR_TEEN_WEEKDAY;
+  const teen = `<div class="metric"><div class="label">한국 중고등학생과 비교 (학교 가는 날)</div>
+    ${fin(myWd) ? `<div class="row"><span>내 평일 평균</span><span class="value">${(myWd / 60).toFixed(1)}시간</span></div>` : ""}
+    <div class="row note"><span>${t.year}년 남학생 주중 평균</span><span>${t.boys.toFixed(1)}시간</span></div>
+    <div class="row note"><span>${t.year}년 여학생 주중 평균</span><span>${t.girls.toFixed(1)}시간</span></div>
+    ${fin(myWd) ? "" : `<p class="note">평일 기록이 ${RULES.minWeekday}일 이상이면 내 평일 평균도 함께 보여줘요.</p>`}</div>`;
+  return card("세계와 비교", `<div class="lead"><span>한국은 하루 평균 ${hm(kr.min)}을 자요. OECD가 모은 ${list.length}개 나라 중</span>
+    <span class="big"><span class="countup" data-to="${krRank}" data-dec="0">${krRank}</span>번째<span class="of"> / ${list.length}개 나라</span></span></div>
+    <ol class="lb" aria-label="하루 평균 수면이 긴 순서, 나를 넣은 표">${short}</ol>
+    <details class="lb-more"><summary>${all.length}자리 전체 보기</summary><ol class="lb">${all.map(li).join("")}</ol></details>
+    <ul class="facts">${facts.map((f) => `<li>${f}</li>`).join("")}</ul>
+    ${teen}
+    <p class="note">나라별 값은 대부분 15~64세의 하루 평균 수면으로, 평일과 주말을 합친 값이에요. 조사 연도는 나라마다 달라요(1998~2019년, 한국 ${kr.year}년).
+    중고등학생 값은 학교 가는 날의 평균이에요.</p>
+    <div class="srcs">${srcLink(WORLD_SOURCES.oecd)}${srcLink(WORLD_SOURCES.kdca)}</div>`);
+}
+
 function selfVsMeasured(m, cls, survey) {
   if (!survey) return "";
   let body = "";
@@ -162,7 +227,7 @@ function goalHelp(g) {
 // withForm이면(개인 결과 페이지) 이 페이지 안에서 목표와 실천 계획 한 줄을 제출한다(Netlify Forms "goal-submit").
 // 확인 코드는 숨은 칸으로 자동으로 붙는다. 없으면(공개 자가진단) 제출 없이, 고른 목표는 이 기기에만 저장된다고 알린다.
 // goalUntil(예: "11월 12일")이 있으면(개인 결과 페이지) 목표 기간을 조사 끝날까지로 적는다.
-// 받는 날에 따라 남은 기간이 8~14일이라 "이번 주"라고 하면 일주일 뒤 그만둘 수 있기 때문이다.
+// 받는 날에 따라 남은 기간이 7~13일이라 "이번 주"라고 하면 일주일 뒤 그만둘 수 있기 때문이다.
 function feedback(text, m, storageKey, withForm, goalUntil) {
   const goals = goalOptions(m);
   let saved = null;
@@ -220,9 +285,10 @@ export function renderResults(el, { records, survey, classRef, feedbackText, sto
   const goals = goalOptions(m);
   const formOk = /^[0-9a-f]{8}$/.test(checkCode || "");      // 개인 결과 페이지에서만 확인 코드가 있다
   el.innerHTML = [glance(m, cls, classRef), midSleep(m, cls, classRef), jetlag(m, cls), weekdays(m), similar(cls),
-    selfVsMeasured(m, cls, survey), trendChart(m), feedback(text, m, storageKey, formOk, goalUntil)].join("");
-  // 보안 정책(CSP)이 HTML 속 style 속성을 막으므로 위치는 그린 뒤 JS로 넣는다
+    world(m, cleanRecords(records)), selfVsMeasured(m, cls, survey), trendChart(m), feedback(text, m, storageKey, formOk, goalUntil)].join("");
+  // 보안 정책(CSP)이 HTML 속 style 속성을 막으므로 위치와 막대 길이는 그린 뒤 JS로 넣는다
   el.querySelectorAll("[data-x]").forEach((d) => { d.style.left = `${d.dataset.x}%`; });
+  el.querySelectorAll("[data-w]").forEach((d) => { d.style.width = `${d.dataset.w}%`; });
   animateResults(el);
   const form = el.querySelector(".goal-form");
   const chosen = () => el.querySelector('input[name="goal"]:checked');

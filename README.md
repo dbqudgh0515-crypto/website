@@ -25,7 +25,8 @@
 | `start/index.html`, `assets/start.js` | 시작 설문(이름, 참여 동의, 규칙성 1~5, 주말 기상 지연 예상). Netlify Forms `start-survey` |
 | `review/index.html`, `assets/review.js` | 사용 후기(사전등록 9장 문항, 이름 포함). Netlify Forms `review-survey`. 14일차(11/5) 배포부터 올리고 11/13에 안내 |
 | `assets/netlify-form.js` | 세 폼의 제출: 같은 사이트로 fetch POST(CSP connect-src 'self'), 스팸 방지 숨은 칸 |
-| `assets/goals.js` | 목표 도우미: 목표별 실천 계획 예시, 팁(출처 확인한 것만), 목표 제출 폼 미리 채우기 주소 |
+| `assets/goals.js` | 목표 도우미: 목표별 실천 계획 예시, 팁(출처 확인한 것만) |
+| `assets/world.js` | "세계와 비교" 카드 자료: OECD 시간 사용 자료(2021년판) 33개 나라 하루 평균 수면, 질병관리청 청소년건강행태조사 2025 중고등학생 주중 평균 수면. 출처 원문을 열어 확인한 숫자만 |
 | `assets/style.css`, `assets/motion.js` | 화면 모양과 등장 움직임(움직임 줄이기 설정이면 움직이지 않음) |
 | `assets/fonts/pretendard/` | Pretendard 글꼴(1.3.9, 가변 글꼴 나눔 파일). CSP 때문에 외부 CDN 대신 직접 넣음. SIL OFL 1.1, `LICENSE.txt` 함께 둠 |
 | `assets/selfcheck.js`, `assets/personal.js` | 공개 / 개인 페이지 동작 |

@@ -207,6 +207,36 @@ button.primary:disabled { background: var(--color-grid); color: var(--color-ink-
 .form-msg.ok { color: var(--color-accent-strong); }
 .form-msg.err { color: var(--color-error); }
 
+/* 세계와 비교: 순위표. 나는 강조색 줄, 한국은 굵게. 막대 길이는 render.js가 그린 뒤 넣는다(CSP) */
+.big .of { font-size: var(--fs-note); font-weight: var(--fw-medium); color: var(--color-ink-2); letter-spacing: 0; margin-left: var(--space-1); }
+.lb { list-style: none; margin: var(--space-3) 0 0; padding: 0; }
+.lb-row {
+  display: grid; grid-template-columns: 2.2em minmax(0, 1fr) auto; align-items: baseline; column-gap: var(--space-2); row-gap: 4px;
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-inner); font-variant-numeric: tabular-nums;
+}
+.lb-rank { color: var(--color-ink-2); font-size: var(--fs-small); font-weight: var(--fw-semibold); }
+.lb-name { font-weight: var(--fw-medium); }
+.lb-time { font-size: var(--fs-note); color: var(--color-ink-2); white-space: nowrap; }
+.lb-bar { grid-column: 2 / -1; height: 6px; border-radius: var(--radius-pill); background: var(--color-grid); overflow: hidden; }
+.lb-bar i { display: block; height: 100%; width: 0; border-radius: var(--radius-pill); background: var(--color-band); }
+.lb-row.kr .lb-name { font-weight: var(--fw-bold); }
+.lb-row.me { background: var(--color-accent-soft); }
+.lb-row.me .lb-rank, .lb-row.me .lb-name, .lb-row.me .lb-time { color: var(--color-accent-strong); font-weight: var(--fw-bold); }
+.lb-row.me .lb-bar i { background: var(--color-accent); }
+.lb-gap { text-align: center; color: var(--color-ink-2); line-height: 1; padding: 2px 0; }
+details.lb-more { margin: var(--space-2) 0 var(--space-4); }
+details.lb-more .lb { margin-top: var(--space-2); }
+.facts { margin: var(--space-4) 0 var(--space-2); padding-left: 1.1em; }
+.facts li { margin-bottom: var(--space-2); line-height: var(--lh-note); }
+.facts li::marker { color: var(--color-accent); }
+.srcs { display: flex; flex-direction: column; gap: var(--space-1); margin-top: var(--space-3); }
+.srcs .src { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); }
+.srcs a { color: var(--color-accent-strong); font-size: var(--fs-small); text-underline-offset: 2px; }
+.srcs .lang {
+  font-size: var(--fs-small); line-height: 1.4; color: var(--color-ink-2);
+  border: 1px solid var(--color-border); border-radius: var(--radius-pill); padding: 0 var(--space-2);
+}
+
 footer { color: var(--color-ink-2); font-size: var(--fs-small); line-height: var(--lh-note); text-align: center; margin-top: var(--space-7); }
 
 /* 움직임: motion.js가 결과 영역에 .anim을 붙이고, 카드가 화면에 들어오면 .in을 붙인다.
@@ -221,6 +251,11 @@ footer { color: var(--color-ink-2); font-size: var(--fs-small); line-height: var
   /* 막대는 자라고 */
   .anim > .card .posbar .track, .anim > .card .posbar .band { transform: scaleX(0); transform-origin: left center; }
   .anim > .card.in .posbar .track, .anim > .card.in .posbar .band {
+    transform: scaleX(1);
+    transition: transform var(--dur-grow) var(--ease-out) calc(var(--card-delay, 0ms) + var(--delay-grow));
+  }
+  .anim > .card .lb-bar i { transform: scaleX(0); transform-origin: left center; }
+  .anim > .card.in .lb-bar i {
     transform: scaleX(1);
     transition: transform var(--dur-grow) var(--ease-out) calc(var(--card-delay, 0ms) + var(--delay-grow));
   }
