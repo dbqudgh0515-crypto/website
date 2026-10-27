@@ -109,8 +109,9 @@ function srcLink(s) {
     aria-label="출처: ${esc(s.name)}, ${esc(s.lang)} 자료, 새 탭에서 열려요">출처: ${esc(s.name)}</a><span class="lang">${esc(s.lang)}</span></span>`;
 }
 
-// 세계와 비교: OECD가 모은 33개 나라의 하루 평균 수면 순위(한국의 자리)와, 그 사이에 내 평균을 넣어 본 자리,
+// 세계와 비교: OECD가 모은 33개 나라의 하루 평균 수면 순위(한국의 자리)와, 그 사이에 내 평균을 넣어 본 자리(순위표에만),
 // 한국 중고등학생 주중 평균. 숫자는 world.js의 출처 그대로이고 위치만 보여 준다. rows는 cleanRecords 결과(평일 평균 계산용).
+// 목표 카드 뒤 맨 아래에 둔다: 결과 → 목표·계획 제출이라는 핵심 흐름을 길게 만들지 않으려고(2026-10-27).
 function world(m, rows) {
   if (!fin(m.sleepMean)) return "";
   const list = OECD_SLEEP, mine = m.sleepMean;
@@ -134,7 +135,6 @@ function world(m, rows) {
   const facts = [
     `가장 짧은 나라는 ${last.name}(${hm(last.min)}), 가장 긴 나라는 ${top.name}(${hm(top.min)})${josa(top.name, "이에요", "예요")}.
       ${top.name}${josa(top.name, "과", "와")} 한국은 하루 ${hm(diff)} 차이라서, 1년이면 약 ${Math.round((diff * 365) / 1440)}일이에요.`,
-    `내 평균 ${hm(mine)}을 이 표에 넣으면 ${all.length}자리 중 <b>${meI + 1}번째</b>예요.`,
     `${list.length}개 나라 평균은 ${hm(avg)}이에요. 내 평균과는 하루 ${hm(Math.abs(avg - mine))} 차이예요.`,
     `내 평균대로라면 1년에 약 ${Math.round((mine * 365) / 1440)}일을 자는 셈이에요.`,
   ];
@@ -285,7 +285,7 @@ export function renderResults(el, { records, survey, classRef, feedbackText, sto
   const goals = goalOptions(m);
   const formOk = /^[0-9a-f]{8}$/.test(checkCode || "");      // 개인 결과 페이지에서만 확인 코드가 있다
   el.innerHTML = [glance(m, cls, classRef), midSleep(m, cls, classRef), jetlag(m, cls), weekdays(m), similar(cls),
-    world(m, cleanRecords(records)), selfVsMeasured(m, cls, survey), trendChart(m), feedback(text, m, storageKey, formOk, goalUntil)].join("");
+    selfVsMeasured(m, cls, survey), trendChart(m), feedback(text, m, storageKey, formOk, goalUntil), world(m, cleanRecords(records))].join("");
   // 보안 정책(CSP)이 HTML 속 style 속성을 막으므로 위치와 막대 길이는 그린 뒤 JS로 넣는다
   el.querySelectorAll("[data-x]").forEach((d) => { d.style.left = `${d.dataset.x}%`; });
   el.querySelectorAll("[data-w]").forEach((d) => { d.style.width = `${d.dataset.w}%`; });
