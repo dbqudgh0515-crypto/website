@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 같은 사이트로만 응답을 보낸다(connect-src 'self'). 외부 요청 없음. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>생활리듬 매일 기록</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/fonts/pretendard/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<main>
+  <h1>생활리듬 매일 기록</h1>
+  <p class="sub">매일 아침 일어나서 한 번, 어젯밤 잠든 시각과 오늘 일어난 시각을 적어 주세요. 30초면 끝나요.</p>
+
+  <!-- Netlify Forms가 배포할 때 이 폼을 알아본다. 제출은 record.js가 같은 사이트로 fetch POST 한다.
+       문항은 매일 기록의 필수 문항만(사전등록 6장, 2026-10-28 수정). -->
+  <form class="card record-form" name="daily-record" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+    <div class="field">
+      <label class="field-label" for="name">이름 <span class="req">필수</span></label>
+      <p class="note field-help">시작 설문에 쓴 이름과 똑같이 써 주세요. 이 기기에 기억해 두고 다음부터 채워 둘게요.</p>
+      <input id="name" name="name" type="text" maxlength="40" autocomplete="name" required>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="date">일어난 날짜 <span class="req">필수</span></label>
+      <p class="note field-help">오늘 아침 기록이면 그대로 두세요. 지난 날을 늦게 적을 때만 바꿔요.</p>
+      <input id="date" name="date" type="date" required>
+    </div>
+
+    <div class="field times">
+      <div>
+        <label class="field-label" for="bed_time">어젯밤 잠든 시각 <span class="req">필수</span></label>
+        <input id="bed_time" name="bed_time" type="time" required>
+      </div>
+      <div>
+        <label class="field-label" for="wake_time">오늘 일어난 시각 <span class="req">필수</span></label>
+        <input id="wake_time" name="wake_time" type="time" required>
+      </div>
+    </div>
+    <p class="note">잠든 시각은 불을 끄고 자려고 누운 시각, 일어난 시각은 실제로 눈을 떠서 일어난 시각이에요.</p>
+
+    <p class="hp" aria-hidden="true"><label>비워 두세요 <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+    <button type="submit" class="primary">제출하기</button>
+    <p class="form-msg" role="status" aria-live="polite"></p>
+    <p class="note last-sent" hidden></p>
+  </form>
+
+  <footer>응답은 이 사이트(Netlify)로만 보내고, 다른 곳으로 보내지 않아요.</footer>
+</main>
+<script type="module" src="../assets/record.js"></script>
+</body>
+</html>

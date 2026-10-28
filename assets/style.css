@@ -165,12 +165,12 @@ details summary { cursor: pointer; color: var(--color-ink-2); font-size: var(--f
 .err:empty { display: none; }
 
 /* 폼 공통 (시작 설문, 목표 제출) */
-.start-form .field, .review-form .field { margin-bottom: var(--space-5); }
+.start-form .field, .review-form .field, .record-form .field { margin-bottom: var(--space-5); }
 fieldset.field { border: 0; padding: 0; margin: 0 0 var(--space-5); min-width: 0; }
-.start-form .field-label, .review-form .field-label, .goal-form .field-label { display: block; font-weight: var(--fw-semibold); font-size: var(--fs-body); color: var(--color-ink); margin-bottom: var(--space-2); line-height: 1.5; padding: 0; }
+.start-form .field-label, .review-form .field-label, .record-form .field-label, .goal-form .field-label { display: block; font-weight: var(--fw-semibold); font-size: var(--fs-body); color: var(--color-ink); margin-bottom: var(--space-2); line-height: 1.5; padding: 0; }
 .req { font-size: var(--fs-small); font-weight: var(--fw-semibold); color: var(--color-accent-strong); margin-left: var(--space-1); }
-.start-form .field-help, .review-form .field-help { margin: calc(var(--space-1) * -1) 0 var(--space-2); }
-.start-form input[type=text], .review-form input[type=text], .goal-form input[type=text], .with-unit input {
+.start-form .field-help, .review-form .field-help, .record-form .field-help { margin: calc(var(--space-1) * -1) 0 var(--space-2); }
+.start-form input[type=text], .review-form input[type=text], .record-form input, .goal-form input[type=text], .with-unit input {
   width: 100%; min-width: 0; font: inherit; font-size: var(--fs-control); color: var(--color-ink);
   padding: 11px var(--space-3); background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius-control);
 }
@@ -199,7 +199,14 @@ fieldset.field { border: 0; padding: 0; margin: 0 0 var(--space-5); min-width: 0
 .consent-check label { color: var(--color-ink); font-size: var(--fs-body); font-weight: var(--fw-medium); display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4); background: var(--color-bg); border-radius: var(--radius-inner); cursor: pointer; line-height: 1.5; }
 .consent-check input { margin: 2px 0 0; accent-color: var(--color-accent); width: 20px; height: 20px; flex: none; }
 .goal-form { margin-top: var(--space-4); }
-.goal-form .goal-submit, .start-form button.primary, .review-form button.primary { margin-top: var(--space-4); }
+.goal-form .goal-submit, .start-form button.primary, .review-form button.primary, .record-form button.primary { margin-top: var(--space-4); }
+/* 매일 기록: 휴대폰에서 입력칸을 누를 때 화면이 확대되지 않게 16px. 잠든·일어난 시각은 두 칸으로 나란히 */
+.record-form input { font-size: var(--fs-body); min-height: 46px; }
+.record-form .times { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-3); }
+.record-form .times .field-label { font-size: var(--fs-note); }
+.record-form .last-sent { margin-top: var(--space-2); }
+.start-done { margin-top: var(--space-4); }
+.start-done[hidden] { display: none; }       /* a.button의 display: block이 hidden 속성을 덮지 않게 */
 button.primary:disabled { background: var(--color-grid); color: var(--color-ink-2); cursor: default; }
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .form-msg { font-size: var(--fs-note); font-weight: var(--fw-medium); margin: var(--space-3) 0 0; color: var(--color-ink-2); }

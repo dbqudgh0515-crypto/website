@@ -30,7 +30,8 @@ form.addEventListener("submit", async (ev) => {
     "bot-field": form.elements["bot-field"].value,
   });
   msg.className = ok ? "form-msg ok" : "form-msg err";
-  msg.textContent = ok ? "제출했어요. 고마워요. 매일 기록은 11월 12일(목)까지 계속해 주세요."
+  msg.textContent = ok ? "제출했어요. 고마워요. 아래 버튼으로 매일 기록 폼을 열어 두세요. 기록은 11월 18일(수)까지예요."
     : "제출하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요. 쓴 내용은 그대로 있어요.";
   btn.disabled = false;
+  if (ok) form.querySelector(".start-done").hidden = false;           // 매일 기록 폼(/record/)으로 가는 버튼
 });

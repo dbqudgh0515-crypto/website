@@ -226,7 +226,7 @@ function goalHelp(g) {
 
 // withForm이면(개인 결과 페이지) 이 페이지 안에서 목표와 실천 계획 한 줄을 제출한다(Netlify Forms "goal-submit").
 // 확인 코드는 숨은 칸으로 자동으로 붙는다. 없으면(공개 자가진단) 제출 없이, 고른 목표는 이 기기에만 저장된다고 알린다.
-// goalUntil(예: "11월 12일")이 있으면(개인 결과 페이지) 목표 기간을 조사 끝날까지로 적는다.
+// goalUntil(예: "11월 18일")이 있으면(개인 결과 페이지) 목표 기간을 조사 끝날까지로 적는다.
 // 받는 날에 따라 남은 기간이 7~13일이라 "이번 주"라고 하면 일주일 뒤 그만둘 수 있기 때문이다.
 function feedback(text, m, storageKey, withForm, goalUntil) {
   const goals = goalOptions(m);
